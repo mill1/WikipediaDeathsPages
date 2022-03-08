@@ -1,0 +1,134 @@
+<h4 >Day of Death Generator</h4>
+<div>
+  <div class="input-group">
+    <label for="deathdate">Req. date:&nbsp;</label>
+    <input 
+    type="text"  
+    id="deathdate"  
+    size="12"
+    placeholder="Select a date"         
+    bsDatepicker 
+    [(bsValue)]="bsValue"
+    value="{{ bsValue | date:'d MMM yyyy' }}">
+    <span class="space6px"></span>
+    <button type="button" class="btn btn-secondary" (click)="addDays(-1)" [disabled]="isBusy">&ndash;</button>    
+    <span class="space6px"></span>
+    <button type="button" class="btn btn-secondary" (click)="addDays(1)" [disabled]="isBusy">+</button>
+    <span class="space9px"></span>
+    <label for="minimumscore">Min. score:&nbsp;</label>
+    <input             
+    [(ngModel)]="minimumscore" 
+    type="number" 
+    id="minimumscore" 
+    size="1">
+    <span class="space6px"></span>
+    <button type="button" class="btn btn-primary" (click)="onFetch()" [disabled]="isBusy">fetch</button>
+  </div>
+</div>
+
+<p *ngIf="isBusy; else elseBlock"><em>Please wait...</em></p>
+<ng-template #elseBlock><div>&nbsp;</div></ng-template>
+
+<div *ngIf="entries">
+  <table class="table table-sm">
+    <thead class="thead-dark">
+    <tr>    
+      <th class="unselectable" style="width: 81%;"><h5>Death day entries</h5></th>
+      <th class="unselectable" align="center" style="width: 5%;">ref</th>
+      <th class="unselectable" align="center" style="width: 5%;"><small>score #4: </small>{{getScoreNumberFour()}}</th>
+      <th class="unselectable" align="center" style="width: 3%;">&nbsp;</th>
+      <th class="unselectable" align="center" style="width: 3%;"><small>wp DoB</small></th>
+      <th class="unselectable" align="center" style="width: 3%;"><small>wp DoD</small></th>      
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="selectable"><a href="{{getDayUrl()}}" target="_blank">==={{getDay()}}===</a></td>
+      <td class="unselectable" colspan="3">&nbsp;</td>
+    </tr>      
+    <tr [ngClass]="{'warn': applyWarningStyle(i), 'existing': applyExistingStyle(i), 'existing-and-warn': applyExistingAndWarnStyle(i), 'error': applyErrorStyle(i)}"  *ngFor="let entry of entries; index as i">
+
+      <td class="selectable">
+        <a href="{{entry.wikipediaArticle.uri}}" target="_blank">{{entry.wikiText}}</a>
+      </td>
+
+      <td class="unselectable" align="center">
+        <a href="{{entry.referenceUrl}}" target="_blank">{{entry.referenceUrl === null ? '' : 'ref'}}</a>           
+      </td>
+
+      <td class="unselectable" align="center">
+        <a href="{{entry.wikidataItem.uri}}" target="_blank">
+          <img src="../../assets/edit.png"             
+            class="img-responsive" 
+            style="max-height: 14px"> 
+        </a>           
+      </td>
+
+      <td class="unselectable" align="center">
+        <img src="../../assets/delete.png"     
+        (click)="onDeleteEntryClicked(i)"      
+        class="img-responsive" 
+        style="max-height: 20px">            
+      </td>
+
+      <td class="unselectable" align="center">
+        <img src="{{getImageSource(entry.wikidataItem.dateOfBirth === entry.wikipediaArticle.dateOfBirth)}}"                 
+        style="max-height: 20px">            
+     </td>
+
+     <td class="unselectable" align="center">
+      <img src="{{getImageSource(entry.wikidataItem.dateOfDeath === entry.wikipediaArticle.dateOfDeath)}}"                   
+      style="max-height: 20px">            
+     </td>
+
+    </tr>
+  </tbody>
+  </table>
+</div>
+
+<div *ngIf="rejectedEntries">
+  <table class="table table-sm"> <!-- bootstrap class table-striped niet gebruiken: overwrites [ngClass] -->
+    <thead class="thead-dark">
+    <tr>      
+      <td class="selectable">&nbsp;&nbsp;&nbsp;</td>   
+      <td class="unselectable" colspan="4"><h6>Rejected existing entries</h6></td>
+    </tr> 
+    <tr>    
+      <th class="unselectable" align="center" style="width: 3%;">Score</th>
+      <th class="unselectable" style="width: 64%;">Entry</th>
+      <th class="unselectable" align="center" style="width: 5%;">ref</th>
+      <th class="unselectable" align="center" style="width: 3%;">&nbsp;</th>
+      <th class="unselectable" style="width: 25%;">Rejection reason</th>      
+    </tr>  
+  </thead>
+  <tbody>  
+    <tr [ngClass]="{'warn': applyWarningStyleRejectedEntries(i)}" *ngFor="let entry of rejectedEntries; index as i">
+
+      <td class="unselectable" align="center">
+        {{entry.notabilityScore}}        
+      </td>
+
+      <td class="selectable">
+        <a href="{{entry.uri}}" target="_blank">*{{entry.wikiText}}</a>      
+      </td>
+
+      <td class="unselectable" align="center">
+        <a href="{{entry.referenceUrl}}" target="_blank">{{entry.referenceUrl === null ? '' : 'ref'}}</a>           
+      </td>
+
+      <td class="unselectable" align="center">
+        <img src="../../assets/delete.png"     
+        (click)="onDeleteRejectedEntryClicked(i)"      
+        class="img-responsive" 
+        style="max-height: 20px">            
+      </td>
+
+      <td class="unselectable">
+        {{entry.reasonKeepReject}}       
+      </td>
+    </tr>
+  </tbody>
+  </table>
+</div>
+
+<app-wikidata-details [deathEntries]="entries" [deathEntriesSorted]="entries"></app-wikidata-details>

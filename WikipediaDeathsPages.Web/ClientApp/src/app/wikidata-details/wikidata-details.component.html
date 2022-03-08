@@ -1,0 +1,41 @@
+<table *ngIf="deathEntries" >
+    <tr>  
+      <td><h5>Wikidata details</h5></td>
+    </tr>
+  </table>
+    
+  <table class='table table-striped' aria-labelledby="tableLabel" *ngIf="deathEntries">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col" sortable="notabilityScore" (sort)="onSort($event)">Score</th>
+        <th scope="col" >#SL</th>
+        <th scope="col" sortable="linksToArticleCount" (sort)="onSort($event)">#AL</th>
+        <th scope="col">URI</th>
+        <th scope="col">Label</th>
+        <th scope="col">Article name</th>
+        <th scope="col">Description</th>
+        <th scope="col">Birth date</th>
+        <th scope="col">Death date</th>
+        <th scope="col">COD</th>
+        <th scope="col">MOD</th>
+        <th scope="col">DOD Refs</th>
+        <th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let entry of deathEntriesSorted">
+        <td>{{ entry.notabilityScore }}</td>
+        <td>{{ entry.wikidataItem.siteLinksCount }}</td>
+        <td>{{ entry.wikipediaArticle.linksToArticleCount }}</td>
+        <td> <a href="{{ entry.wikidataItem.uri }}" target="_blank">item</a></td>
+        <td scope="row">{{ entry.wikidataItem.label }}</td>
+        <td> <a href="{{ entry.wikipediaArticle.uri }}" target="_blank">{{ entry.wikidataItem.articleName }}</a></td>
+        <td>{{ entry.wikidataItem.description }}</td>  
+        <td>{{ entry.wikidataItem.dateOfBirth | date: 'dd/MM/yyyy'}}</td>    
+        <td>{{ entry.wikidataItem.dateOfDeath | date: 'dd/MM/yyyy'}}</td>    
+        <td>{{ entry.wikidataItem.causeOfDeath }}</td>
+        <td>{{ entry.wikidataItem.mannerOfDeath }}</td>
+        <td>{{ entry.wikidataItem.dateOfDeathRefs }}</td>
+      </tr>
+    </tbody>
+  </table>

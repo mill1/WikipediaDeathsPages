@@ -1,0 +1,30 @@
+.warn {
+    background-color: rgb(255, 230, 230);
+}
+.existing {
+    background-color: rgb(220, 240, 255);
+}
+.existing-and-warn {
+    background-color: rgb(255, 220, 255);
+}
+.error {
+    background-color: rgb(255, 55, 55);
+}
+.unselectable {
+    -webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-o-user-select:none;
+	user-select: none;
+}
+.selectable {
+    -webkit-touch-callout: all;
+	-webkit-user-select: all;
+	-khtml-user-select: all;
+	-moz-user-select: all;
+	-ms-user-select: all;
+	-o-user-select:all;
+	user-select: all;
+}

@@ -1,0 +1,18 @@
+<h4>Sandbox</h4>
+
+<p aria-live="polite">Current count: <strong>{{ currentCount }}</strong></p>
+
+<button class="btn btn-primary" (click)="incrementCounter()">Increment</button>
+<hr>
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 col-12 col-md-4 form-group">
+      <input type="text"
+            class="form-control"
+            placeholder="Select a date"
+            bsDatepicker
+            #selectedDate>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="onClick()">click</button>
+  </div>
+</div>

@@ -202,9 +202,7 @@ namespace WikipediaDeathsPages.Service
 
             if (resolveReference)
             {
-                var articleLabel = GetArticleLabel(existingEntry.ArticleLinkedName);
-
-                existingEntry.Reference = ResolveReferenceByKnownFor(existingEntry, dateOfDeathReferences, wikiText, articleLabel, deathDate);
+                existingEntry.Reference = ResolveReferenceByKnownFor(existingEntry, dateOfDeathReferences, wikiText, existingEntry.ArticleLinkedName, deathDate);
             }
 
             existingEntry.NotabilityScore = notabilityScore;
@@ -213,26 +211,23 @@ namespace WikipediaDeathsPages.Service
         }
 
         // Bit iffy; needed to determine refs regarding first day of year
-        public string ResolveReferenceByKnownFor(ExistingEntryDto existingEntry, string dateOfDeathReferences, string wikiText, string articleLabel, DateTime deathDate)
+        public string ResolveReferenceByKnownFor(ExistingEntryDto existingEntry, string dateOfDeathReferences, string wikiText, string articleLinkedName, DateTime deathDate)
         {
-            var articleLinkedName = existingEntry == null ? articleLabel : existingEntry.ArticleLinkedName;
-
             if (wikiText == null)
                 wikiText = wikipediaWebClient.GetWikiTextArticle(articleLinkedName, out _);
 
             if (existingEntry == null)
-                existingEntry = CreateExistingEntryDto(wikiText, deathDate, articleLabel);
+                existingEntry = CreateExistingEntryDto(wikiText, deathDate, articleLinkedName);
 
             string knownFor = wikiTextService.ResolveKnownFor(wikiText, existingEntry.Information);
-            return ResolveReference(existingEntry.Reference, deathDate, dateOfDeathReferences, articleLabel, knownFor);
+            return ResolveReference(existingEntry.Reference, deathDate, dateOfDeathReferences, GetArticleLabel(articleLinkedName), knownFor);
         }
 
-        private ExistingEntryDto CreateExistingEntryDto(string wikiText, DateTime deathDate, string article)
+        private ExistingEntryDto CreateExistingEntryDto(string wikiText, DateTime deathDate, string articleLinkedName)
         {
             return new ExistingEntryDto()
-            {
-                ArticleName = GetArticleLabel(article),
-                ArticleLinkedName = article,
+            {                
+                ArticleLinkedName = articleLinkedName,
                 DateOfDeath = deathDate,
                 Information = wikiTextService.ResolveDescription(wikiText),
                 Reference = null

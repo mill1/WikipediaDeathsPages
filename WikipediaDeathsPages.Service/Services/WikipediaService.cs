@@ -202,16 +202,36 @@ namespace WikipediaDeathsPages.Service
 
             if (resolveReference)
             {
-                if (wikiText == null)
-                    wikiText = wikipediaWebClient.GetWikiTextArticle(existingEntry.ArticleLinkedName, out _);
-
-                string knownFor = wikiTextService.ResolveKnownFor(wikiText, existingEntry.Information);
-                existingEntry.Reference = ResolveReference(existingEntry.Reference, deathDate, dateOfDeathReferences, GetArticleLabel(existingEntry.ArticleLinkedName), knownFor);
+                existingEntry.Reference = ResolveReferenceByKnownFor(existingEntry, dateOfDeathReferences, wikiText, existingEntry.ArticleLinkedName, deathDate);
             }
 
             existingEntry.NotabilityScore = notabilityScore;
             existingEntry.Keep = KeepExistingEntry(existingEntry, out string reason);
             existingEntry.ReasonKeepReject = reason;
+        }
+
+        // Bit iffy; needed to determine refs regarding first day of year
+        public string ResolveReferenceByKnownFor(ExistingEntryDto existingEntry, string dateOfDeathReferences, string wikiText, string articleLinkedName, DateTime deathDate)
+        {
+            if (wikiText == null)
+                wikiText = wikipediaWebClient.GetWikiTextArticle(articleLinkedName, out _);
+
+            if (existingEntry == null)
+                existingEntry = CreateExistingEntryDto(wikiText, deathDate, articleLinkedName);
+
+            string knownFor = wikiTextService.ResolveKnownFor(wikiText, existingEntry.Information);
+            return ResolveReference(existingEntry.Reference, deathDate, dateOfDeathReferences, GetArticleLabel(articleLinkedName), knownFor);
+        }
+
+        private ExistingEntryDto CreateExistingEntryDto(string wikiText, DateTime deathDate, string articleLinkedName)
+        {
+            return new ExistingEntryDto()
+            {                
+                ArticleLinkedName = articleLinkedName,
+                DateOfDeath = deathDate,
+                Information = wikiTextService.ResolveDescription(wikiText),
+                Reference = null
+            };
         }
 
         private string ResolveReference(string existingReference, DateTime deathDate, string dateOfDeathReferences, string articleLabel, string knownFor)

@@ -279,9 +279,8 @@ namespace WikipediaDeathsPages.Service
         private bool KeepExistingEntry(ExistingEntryDto existingEntry, out string reason)
         {
 
-#pragma warning disable S1135 // Track uses of "TODO" tags
-            // TODO arbitrary: increase after processing 1995
-            if (existingEntry.NotabilityScore >= 12)
+#pragma warning disable S1135 // Track uses of "TODO" tags            
+            if (existingEntry.NotabilityScore >= 24)
 #pragma warning restore S1135 // Track uses of "TODO" tags
             {
                 reason = "Notability";
@@ -343,17 +342,25 @@ namespace WikipediaDeathsPages.Service
 
         private IEnumerable<ExistingEntryDto> GetExistingEntries(DateTime deathDate)
         {
-            string text = wikiTextService.GetWikiTextDeathsPerMonth(deathDate, false);
+            try
+            {
+                string text = wikiTextService.GetWikiTextDeathsPerMonth(deathDate, false);
 
-            if (text == null)
+                if (text == null) // no entries regarding that DoD
+                    return new List<ExistingEntryDto>();
+
+                text = wikiTextService.GetDaySectionOfMonthList(text, deathDate.Day);
+
+                IEnumerable<string> deceasedText = wikiTextService.GetDeceasedTextAsList(text);
+                IEnumerable<ExistingEntryDto> deceased = deceasedText.Select(e => ParseEntry(e, deathDate));
+
+                return deceased;
+            }
+            catch (WikipediaPageNotFoundException)
+            {
+                // Deaths per month article does not exist (yet)
                 return new List<ExistingEntryDto>();
-
-            text = wikiTextService.GetDaySectionOfMonthList(text, deathDate.Day);
-
-            IEnumerable<string> deceasedText = wikiTextService.GetDeceasedTextAsList(text);
-            IEnumerable<ExistingEntryDto> deceased = deceasedText.Select(e => ParseEntry(e, deathDate));
-
-            return deceased;
+            }
         }
 
         private void EvaluateExistingEntries(WikipediaListItemDto entry, List<ExistingEntryDto> existingEntries)
@@ -427,7 +434,15 @@ namespace WikipediaDeathsPages.Service
             WikipediaListItemDto correctEntry;
             while (ContainsRemovableEntry(entries, out correctEntry))
             {
+                int count = entries.Count;
                 entries.RemoveAll(e => e.Id == correctEntry.Id && e.WikidataItem.DateOfBirth != e.WikipediaArticle.DateOfBirth);
+
+
+                if (entries.Count == count)
+                {
+                    // The 'Mas Oyama' issue
+                    throw new InvalidWikipediaPageException($"Exceptional situation: Multiple DoB's in WP article that match the multiple DoB's in the corresponding WikiData item! Entry: {correctEntry.WikipediaArticle.Name}. Fix it.");
+                }
             }
         }
 
@@ -463,6 +478,7 @@ namespace WikipediaDeathsPages.Service
                     }
                 }
             }
+
             return false;
         }
 

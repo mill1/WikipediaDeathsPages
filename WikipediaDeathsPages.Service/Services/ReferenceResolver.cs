@@ -330,7 +330,7 @@ namespace WikipediaDeathsPages.Service
 
         private string GetReferenceFromWikidatRefItemsFirst(string articleLabel, List<string> referenceItems, DateTime deathDate)
         {
-            if (referenceItems == null)
+            if (!referenceItems.Any())
                 return null;
 
             string url = null;
@@ -387,7 +387,7 @@ namespace WikipediaDeathsPages.Service
 
         private string GetReferenceFromWikidatRefItemsSecond(string articleLabel, List<string> referenceItems)
         {
-            if (referenceItems == null)
+            if (!referenceItems.Any())
                 return null;
 
             string url = null;
@@ -564,12 +564,12 @@ namespace WikipediaDeathsPages.Service
                    "}}</ref>";
         }
 
-        public List<string> GetReferenceItems(string dateOfDeathreferences)
+        public List<string> GetReferenceItems(string dateOfDeathReferences)
         {
-            if (dateOfDeathreferences == null)
+            if (dateOfDeathReferences == null)
                 return new List<string>();
 
-            return dateOfDeathreferences.Split("~!").ToList();
+            return dateOfDeathReferences.Split("~!").ToList();
         }
     }
 }

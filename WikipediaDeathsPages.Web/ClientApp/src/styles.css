@@ -33,3 +33,7 @@ a.menu_links {
   width: 9px; 
   display: inline-block;
 }
+@font-face {
+  font-family: lato;
+  src: url(assets/font/COMIC.TTF) format("opentype");
+}

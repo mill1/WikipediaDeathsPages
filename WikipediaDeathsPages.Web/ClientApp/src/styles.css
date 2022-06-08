@@ -34,6 +34,6 @@ a.menu_links {
   display: inline-block;
 }
 @font-face {
-  font-family: lato;
-  src: url(assets/font/COMIC.TTF) format("opentype");
+  font-family: comiclocal;
+  src: url(assets/font/COMIC.TTF);
 }

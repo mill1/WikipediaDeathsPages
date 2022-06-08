@@ -35,6 +35,33 @@ namespace WikipediaDeathsPages.Tests
             Assert.Contains(expectedSubstring, actualString);
         }
 
+        [Fact(DisplayName = "Resolve The Independent reference")]
+        public void ResolveTheIndependentReference()
+        {
+            const string name = "Stanley Woods";
+            const string url = "https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html";
+            var deathDate = new DateTime(1993, 7, 28);
+            var dateOfDeathRef = $"enwiki~!reference URL: {url}";
+            
+            var expectedSubstring = $"author1=Jim Reynolds |author-link1= |title=Obituary: Stanley Woods |url={url} |url-access= |access-date=8 June 2022 |work=[[The Independent]] |language= |date=30 July 1993";
+            var actualString = referenceResolver.Resolve(deathDate, dateOfDeathRef, name, null);
+
+            Assert.Contains(expectedSubstring, actualString);
+        }
+
+        [Fact(DisplayName = "Resolve Washington Post reference")]
+        public void ResolveWashingtonPostReference()
+        {
+            const string name = "Jon Pattis";
+            const string url = "https://www.washingtonpost.com/archive/local/1996/01/15/jon-pattis-58-dies/06d38941-a1f0-4c39-ab05-35ee68e362e2/";            
+            var dateOfDeathRef = $"enwiki~!reference URL: {url}";
+
+            var expectedSubstring = $"title=Obituary {name} |url={url}";
+            var actualString = referenceResolver.Resolve(DateTime.MinValue, dateOfDeathRef, name, null);
+
+            Assert.Contains(expectedSubstring, actualString);
+        }
+
         [Fact(DisplayName = "Resolve Olympic reference")]
         public void ResolveOlympicReference()
         {

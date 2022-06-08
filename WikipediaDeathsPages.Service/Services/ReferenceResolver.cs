@@ -10,6 +10,9 @@ using WikipediaDeathsPages.Data.Interfaces;
 using Wikimedia.Utilities.ExtensionMethods;
 using WikipediaDeathsPages.Service.Helpers;
 using WikipediaDeathsPages.Service.Interfaces;
+using HtmlAgilityPack;
+using Newtonsoft.Json;
+using WikipediaDeathsPages.Service.Models;
 
 /*
 Loop eerst door de 'referenties'
@@ -30,7 +33,7 @@ namespace WikipediaDeathsPages.Service
     {
         private readonly IWikipediaReferences wikipediaReferences;
         private readonly ILogger<ReferenceResolver> logger;
-        private readonly System.Net.WebClient webClient;
+        private readonly WebClient webClient;
         private readonly CultureInfo cultureInfo;
 
         public ReferenceResolver(IWikipediaReferences wikipediaReferences, ILogger<ReferenceResolver> logger)
@@ -38,7 +41,7 @@ namespace WikipediaDeathsPages.Service
             this.wikipediaReferences = wikipediaReferences;
             this.logger = logger;
 #pragma warning disable S2930 // "IDisposables" should be disposed
-            webClient = new System.Net.WebClient();
+            webClient = new WebClient();
 #pragma warning restore S2930 // "IDisposables" should be disposed
             cultureInfo = new CultureInfo("en-US");
         }
@@ -109,7 +112,7 @@ namespace WikipediaDeathsPages.Service
 
         private string GetOlympediaReference(string articleLabel, DateTime deathDate)
         {
-            var ci = new CultureInfo("en-US");
+            
 
             List<string> names = GetNameAlternatives(articleLabel);
 
@@ -123,15 +126,20 @@ namespace WikipediaDeathsPages.Service
                     {
                         // e.g.    http://www.olympedia.org/athletes/73711
                         var url = "http://www.olympedia.org/athletes/" + id;
-                        var response = webClient.DownloadString(url);
-                        var searchstring = deathDate.ToString("d MMMM yyyy", ci);
+                        var response = webClient.DownloadString(url);                        
 
-                        if (response.Contains(searchstring))
+                        if (response.Contains(GetLongEnDateText(deathDate)))
                             return GenerateWebReference($"Olympedia – {articleLabel}", url, "olympedia.org", DateTime.Today, DateTime.MinValue, publisher: "[[OlyMADMen]]");
                     }
                 }
             }
             return null;
+        }
+
+        private string GetLongEnDateText(DateTime date)
+        {
+            var ci = new CultureInfo("en-US");
+            return date.ToString("d MMMM yyyy", ci);
         }
 
         private List<string> GetNameAlternatives(string name)
@@ -339,8 +347,26 @@ namespace WikipediaDeathsPages.Service
             if (BritannicaUrlFound(referenceItems, ref url))
                 return GenerateBrittanicaWebReference(articleLabel, url, deathDate);
 
+            if (IndependentUrlFound(referenceItems, ref url))
+            {
+                var response = webClient.DownloadString(url);
+                var deathDateSearch = GetLongEnDateText(deathDate);
+
+                if (!response.Contains(deathDateSearch))
+                    return $"Death date '{deathDateSearch}' not found HTML Independent";
+
+                var data = RetrieveIndependentData(response);
+
+                if (data == null)
+                    return "JSON cannot be scraped from HTML Independent";
+
+                var pubdate = DateTime.Parse(data.published_date);
+
+                return GenerateNewsReference(data.article_title, url, "", DateTime.Today, "[[The Independent]]", pubdate, data.article_author);
+            }
+
             if (WashingtonPostUrlFound(referenceItems, ref url))
-                return GenerateNewsReference($"Obituary {articleLabel}", url, "", DateTime.Today, " [[The Washington Post]]", DateTime.MinValue);
+                return GenerateNewsReference($"Obituary {articleLabel}", url, "", DateTime.Today, "[[The Washington Post]]", DateTime.MinValue, "[[Associated Press]]");
 
             if (IBDBUrlFound(referenceItems, ref url))
                 return GenerateWebReference($"{articleLabel} - Broadway Cast & Staff - IBDB", url, "ibdb.com", DateTime.Today, DateTime.MinValue);
@@ -358,6 +384,23 @@ namespace WikipediaDeathsPages.Service
                 return GenerateWebReference($"{articleLabel} - filmportal.de", url, "filmportal.de", DateTime.Today, DateTime.MinValue, language: "German");
 
             return null;
+        }
+
+        private IndependentDigitalData RetrieveIndependentData(string response)
+        {           
+            HtmlDocument htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(response);
+
+            var digitalDataNode = htmlDoc.DocumentNode.Descendants("amp-state")
+            .Where(node => node.GetAttributeValue("id", "").Equals("digitalData")).FirstOrDefault();
+
+            if (digitalDataNode == null)
+                return null;
+
+            var jsonString = digitalDataNode.FirstChild.InnerText;
+            var data = JsonConvert.DeserializeObject<IndependentDigitalData>(jsonString);
+
+            return data;
         }
 
         private string GenerateBrittanicaWebReference(string articleLabel, string url, DateTime deathDate)
@@ -425,6 +468,12 @@ namespace WikipediaDeathsPages.Service
         {
             // e.g. https://www.washingtonpost.com/archive/local/1996/01/15/jon-pattis-58-dies/06d38941-a1f0-4c39-ab05-35ee68e362e2/
             return ReferenceUrlFound("https://www.washingtonpost.com/archive/", referenceItems, ref referenceUrl);
+        }
+
+        private bool IndependentUrlFound(List<string> referenceItems, ref string referenceUrl)
+        {
+            // e.g. https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html
+            return ReferenceUrlFound("https://www.independent.co.uk/news/people/", referenceItems, ref referenceUrl);
         }
 
         private bool BiografischPortaalUrlFound(List<string> referenceItems, ref string referenceUrl)

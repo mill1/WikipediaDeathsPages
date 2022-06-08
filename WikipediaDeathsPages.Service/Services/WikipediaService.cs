@@ -70,7 +70,7 @@ namespace WikipediaDeathsPages.Service
 
         public DeathDateResultDto GetDeathDateResult(DateTime deathDate, int minimumScore)
         {
-            var wikidataItems = wikidataService.GetItemsPerDeathDate(deathDate);
+            var wikidataItems = wikidataService.GetItemsPerDeathDate(deathDate, false);
 
             if (minimumScore > 0)
                 wikidataItems = wikidataItems.Where(i => i.SiteLinksCount > 0);

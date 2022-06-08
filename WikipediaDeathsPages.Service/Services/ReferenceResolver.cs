@@ -136,12 +136,6 @@ namespace WikipediaDeathsPages.Service
             return null;
         }
 
-        private string GetLongEnDateText(DateTime date)
-        {
-            var ci = new CultureInfo("en-US");
-            return date.ToString("d MMMM yyyy", ci);
-        }
-
         private List<string> GetNameAlternatives(string name)
         {
             List<string> names = new List<string> { name };
@@ -181,58 +175,22 @@ namespace WikipediaDeathsPages.Service
 
         private string GetGolferReference(string articleLabel, DateTime deathDate)
         {
+            // e.g.    https://www.where2golf.com/whos-who/payne-stewart/
+            var url = "https://www.where2golf.com/whos-who/" + articleLabel.ToLower().Replace(" ", "-");
 
-            try
-            {
-                // e.g.    https://www.where2golf.com/whos-who/payne-stewart/
-                var url = "https://www.where2golf.com/whos-who/" + articleLabel.ToLower().Replace(" ", "-");
+            var response = DownloadString(url);
 
-                var response = webClient.DownloadString(url);
-
-                var doD = deathDate;
-                var search = $"Died on {GetWhere2GolfMonthName(doD)} {doD.Day}, {doD.Year}";
-
-                if (response.Contains(search))
-                    return GenerateWebReference(articleLabel, url, "where2golf.com", DateTime.Today, DateTime.MinValue);
-
+            if (response == null)
                 return null;
-            }
-            catch (WebException e)
-            {
-                if (((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.NotFound)
-                    return null;
-                else
-                    throw;
-            }
-        }
 
-        private string GetWhere2GolfMonthName(DateTime date)
-        {
-            /*
-            google site:where2golf.com "Died on"
-                Died on Jan 6, 2016 in Tenerife
-                Died on Feb 23, 1868 in Prestwick
-                Died on March 21,
-                Died on April 7, 1997 in Clearwater
-                Died on May 7, 1968 in Palm Beach
-                Died on June 19, 1904 in the Poorhouse
-                Died on July 6, 1996
-                Died on Aug 6, 1948 in Hackensack
-                Died on Sept 11, 1968 in La
-                Died on Oct 25, 1999
-                Died on Nov 6, 2019 in Orange
-                Died on Dec 26, 1916 in Mexico City
-            */
-            string monthName = date.ToString("MMMM", cultureInfo);
+            var doD = deathDate;
+            var search = $"Died on {GetWhere2GolfMonthName(doD)} {doD.Day}, {doD.Year}";
 
-            if (monthName == "September")
-                return "Sept";
+            if (response.Contains(search))
+                return GenerateWebReference(articleLabel, url, "where2golf.com", DateTime.Today, DateTime.MinValue);
 
-            if (monthName.Length <= 5)
-                return monthName;
-            else
-                return monthName.Substring(0, 3);
-        }
+            return null;
+        }        
 
         private string GetAssociationFootballReference(string articleLabel, DateTime deathDate)
         {
@@ -368,20 +326,46 @@ namespace WikipediaDeathsPages.Service
             if (WashingtonPostUrlFound(referenceItems, ref url))
                 return GenerateNewsReference($"Obituary {articleLabel}", url, "", DateTime.Today, "[[The Washington Post]]", DateTime.MinValue, "[[Associated Press]]");
 
+
             if (IBDBUrlFound(referenceItems, ref url))
+            {
+                if (DownloadString(url) == null)
+                    return null;
+
                 return GenerateWebReference($"{articleLabel} - Broadway Cast & Staff - IBDB", url, "ibdb.com", DateTime.Today, DateTime.MinValue);
+            }
 
             if (DbeUrlFound(referenceItems, ref url))
+            {
+                if (DownloadString(url) == null)
+                    return null;
+
                 return GenerateWebReference($"{articleLabel} - DB~e", url, "dbe.rah.es", DateTime.Today, DateTime.MinValue, language: "Spanish", publisher: "Real Academia de la Historia");
+            }
 
             if (BiografischPortaalUrlFound(referenceItems, ref url))
+            {
+                if (DownloadString(url) == null)
+                    return null;
+
                 return GenerateWebReference(articleLabel, url, "biografischportaal.nl", DateTime.Today, DateTime.MinValue, language: "Dutch");
+            }
 
             if (FemBioUrlFound(referenceItems, ref url))
+            {
+                if (DownloadString(url) == null)
+                    return null;
+
                 return GenerateWebReference("Frauendatenbank fembio.org", url, "fembio.org", DateTime.Today, DateTime.MinValue, language: "German");
+            }
 
             if (FilmportalUrlFound(referenceItems, ref url))
+            {
+                if (DownloadString(url) == null)
+                    return null;
+
                 return GenerateWebReference($"{articleLabel} - filmportal.de", url, "filmportal.de", DateTime.Today, DateTime.MinValue, language: "German");
+            }
 
             return null;
         }
@@ -405,27 +389,16 @@ namespace WikipediaDeathsPages.Service
 
         private string GenerateBrittanicaWebReference(string articleLabel, string url, DateTime deathDate)
         {
-            try
-            {
-                var response = webClient.DownloadString(url);
+            var response = DownloadString(url);
 
-                // e.g. <span class="fact-item">July 27, 1996 (aged 85)</span>
-                if (response.Contains(deathDate.ToString("MMMM d, yyyy", cultureInfo) + " (aged "))
-                    return GenerateWebReference(articleLabel, url, "britannica.com", DateTime.Today, DateTime.MinValue, publisher: "Encyclopædia Britannica Online");
-
+            if (response == null)
                 return null;
-            }
-            catch (WebException e)
-            {
 
-#pragma warning disable S1135 // Track uses of "TODO" tags
-                // TODO refacor in case of 3rd case of HttpStatusCode.NotFound
-#pragma warning restore S1135 // Track uses of "TODO" tags
-                if (((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.NotFound)
-                    return null;
-                else
-                    throw;
-            }
+            // e.g. <span class="fact-item">July 27, 1996 (aged 85)</span>
+            if (response.Contains(deathDate.ToString("MMMM d, yyyy", cultureInfo) + " (aged "))
+                return GenerateWebReference(articleLabel, url, "britannica.com", DateTime.Today, DateTime.MinValue, publisher: "Encyclopædia Britannica Online");
+
+            return null;
         }
 
         private string GetReferenceFromWikidatRefItemsSecond(string articleLabel, List<string> referenceItems)
@@ -484,7 +457,7 @@ namespace WikipediaDeathsPages.Service
 
         private bool IBDBUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
-            // e.g. https://www.ibdb.com/broadway-cast-staff/497338
+            // e.g. https://www.ibdb.com/broadway-cast-staff/tom-fuccello-88297
             return ReferenceUrlIdFound("Internet Broadway Database person ID: ", @"https://www.ibdb.com/broadway-cast-staff/", referenceItems, ref referenceUrl);
         }
 
@@ -577,6 +550,40 @@ namespace WikipediaDeathsPages.Service
             return match.Value.ValueBetweenTwoStrings("\"", "\"");
         }
 
+        private string GetLongEnDateText(DateTime date)
+        {
+            var ci = new CultureInfo("en-US");
+            return date.ToString("d MMMM yyyy", ci);
+        }
+
+        private string GetWhere2GolfMonthName(DateTime date)
+        {
+            /*
+            google site:where2golf.com "Died on"
+                Died on Jan 6, 2016 in Tenerife
+                Died on Feb 23, 1868 in Prestwick
+                Died on March 21,
+                Died on April 7, 1997 in Clearwater
+                Died on May 7, 1968 in Palm Beach
+                Died on June 19, 1904 in the Poorhouse
+                Died on July 6, 1996
+                Died on Aug 6, 1948 in Hackensack
+                Died on Sept 11, 1968 in La
+                Died on Oct 25, 1999
+                Died on Nov 6, 2019 in Orange
+                Died on Dec 26, 1916 in Mexico City
+            */
+            string monthName = date.ToString("MMMM", cultureInfo);
+
+            if (monthName == "September")
+                return "Sept";
+
+            if (monthName.Length <= 5)
+                return monthName;
+            else
+                return monthName.Substring(0, 3);
+        }
+
         private string GenerateWebReference(string title, string url, string website, DateTime accessDate, DateTime date,
                                        string last1 = "", string first1 = "", string publisher = "", string language = "")
         {
@@ -619,6 +626,21 @@ namespace WikipediaDeathsPages.Service
                 return new List<string>();
 
             return dateOfDeathReferences.Split("~!").ToList();
+        }
+
+        private string DownloadString(string url)
+        {
+            try
+            {
+                return webClient.DownloadString(url);
+            }
+            catch (WebException e)
+            {
+                if (((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.NotFound)
+                    return null;
+                else
+                    throw;
+            }
         }
     }
 }

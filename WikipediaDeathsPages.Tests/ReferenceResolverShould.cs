@@ -5,6 +5,7 @@ using System;
 using WikipediaDeathsPages.Data.Interfaces;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Diagnostics;
 
 namespace WikipediaDeathsPages.Tests
 {
@@ -59,6 +60,32 @@ namespace WikipediaDeathsPages.Tests
             var expectedSubstring = $"title=Obituary {name} |url={url}";
             var actualString = referenceResolver.Resolve(DateTime.MinValue, dateOfDeathRef, name, null);
 
+            Assert.Contains(expectedSubstring, actualString);
+        }
+
+        [Theory(DisplayName = "Resolve Wikidata references")]
+        [InlineData(
+            "Internet Broadway Database (IBDB)",
+            "Tom Fuccello",
+            "enwiki~!Internet Broadway Database~!retrieved: 2017-10-09T00:00:00Z~!Internet Broadway Database person ID: 88297~!subject named as: Tom Fuccello",
+            "title=Tom Fuccello - Broadway Cast & Staff - IBDB |url=https://www.ibdb.com/broadway-cast-staff/88297 |website=ibdb.com"
+        )]
+        [InlineData(
+            "Spanish Biographical Dictionary (DB~e)",
+            "Emilio Botín",
+            "Spanish Biographical Dictionary~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Emilio Botín-Sanz de Sautuola y López~!Spanish Biographical Dictionary ID: 19291/emilio-botin-sanz-de-sautuola-y-lopez",
+            "title=Emilio Botín - DB~e |url=https://dbe.rah.es/biografias/19291/emilio-botin-sanz-de-sautuola-y-lopez |website=dbe.rah.es |publisher=Real Academia de la Historia"
+        )]
+        [InlineData(
+            "Biografisch Portaal",
+            "Piet Engels",
+            "Biografisch Portaal~!Biografisch Portaal van Nederland ID: 26363517~!reference URL: http://www.biografischportaal.nl/persoon/26363517~!title: Peter Joseph Engels",
+            "title=Piet Engels |url=http://www.biografischportaal.nl/persoon/26363517 |website=biografischportaal.nl"
+        )]
+        public void ResolveWikidataReferences(string source, string articleLabel, string dateOfDeathRefs, string expectedSubstring)
+        {
+            Debug.Write($"Testing source {source}...");
+            var actualString = referenceResolver.Resolve(DateTime.MinValue, dateOfDeathRefs, articleLabel, null);
             Assert.Contains(expectedSubstring, actualString);
         }
 

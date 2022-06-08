@@ -35,7 +35,7 @@ namespace WikipediaDeathsPages.Service
         public ArticleMetrics GetArticleMetrics(string article)
         {
             var linksInfo = toolforgeService.GetWikilinksInfo(article);
-            int siteLinks = wikidataService.GetSitelinksResult(article).SiteLinksCount;
+            int siteLinks = GetSiteLinksCount(article);
 
             return new ArticleMetrics
             {
@@ -43,6 +43,19 @@ namespace WikipediaDeathsPages.Service
                 LinksToArticleCount = linksInfo.direct,
                 SiteLinksCount = siteLinks
             };
+        }
+
+        private int GetSiteLinksCount(string article)
+        {
+            try
+            {
+                return wikidataService.GetSitelinksResult(article).SiteLinksCount;
+            }            
+            catch (NullReferenceException)
+            {
+
+                throw new NullReferenceException($"{article}: Exception retrieving site links. No corresponding Wikidata item?");
+            }
         }
 
         public IEnumerable<ArticleMetrics> GetArticleMetrics(IEnumerable<string> articles)

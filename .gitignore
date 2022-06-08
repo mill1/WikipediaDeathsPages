@@ -390,3 +390,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+/WikipediaDeathsPages.Web/.config/dotnet-tools.json

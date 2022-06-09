@@ -391,12 +391,10 @@ namespace WikipediaDeathsPages.Service
         private bool BritannicaUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // https://www.britannica.com/biography/S-J-Perelman
-            // TODO true?
             if (ReferenceUrlIdFound("Encyclopædia Britannica Online ID: biography/", @"https://www.britannica.com/biography/", referenceItems, true, ref referenceUrl))
                 return true;
 
             // http://www.britannica.com/EBchecked/topic/18816/Viktor-Amazaspovich-Ambartsumian
-            // TODO true?
             if (ReferenceUrlFound("http://www.britannica.com", referenceItems, true, ref referenceUrl))    // oud in Wikidata: http://
                 return true;
 
@@ -456,12 +454,11 @@ namespace WikipediaDeathsPages.Service
         private bool SnacUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // https://snaccooperative.org/ark:/99166/w6xn23d4
-            return ReferenceUrlIdFound("SNAC ARK ID: ", @"https://snaccooperative.org/ark:/99166/", referenceItems, true, ref referenceUrl);
+            return ReferenceUrlIdFound("SNAC ARK ID: ", @"https://snaccooperative.org/ark:/99166/", referenceItems, false, ref referenceUrl);
         }
 
         private bool BnFUrlFound(List<string> referenceItems, ref string referenceUrl, ref string website)
         {
-            // TODO: 2 testen
             // e.g http://data.bnf.fr/ark:/12148/cb13993433s     // oud in Wikidata: http://
             if (ReferenceUrlFound("http://data.bnf.fr/ark:/12148/", referenceItems, false, ref referenceUrl))  // false: request results in 303 response (redirect)
             {
@@ -485,7 +482,7 @@ namespace WikipediaDeathsPages.Service
                 if (item.StartsWith(idLabel))
                 {
                     var id = item.Substring(idLabel.Length);
-                    referenceUrl = "https://catalogue.bnf.fr/ark:/12148/cb" + id;
+                    referenceUrl = "https://catalogue.bnf.fr/ark:/12148/cb" + id; // do not check validity: request results in 303 response (redirect)
                     website = "catalogue.bnf.fr";
                     return true;
                 }

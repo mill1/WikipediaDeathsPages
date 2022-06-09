@@ -38,7 +38,7 @@ namespace WikipediaDeathsPages.Tests
             Assert.Contains(expectedSubstring2, actualString);
         }
 
-        [Theory(DisplayName = "Resolve Wikidata primary references")]
+        [Theory(DisplayName = "Resolve Wikidata references")]
         [InlineData(
             "Encyclopædia Britannica Online (1)",
             "Utpal Dutt",
@@ -123,17 +123,34 @@ namespace WikipediaDeathsPages.Tests
             "BnF authorities~!Bibliothèque nationale de France ID: 15531676g~!subject named as: Isabela Corona",
             "title=Isabela Corona |url=https://catalogue.bnf.fr/ark:/12148/cb15531676g |website=catalogue.bnf.fr |publisher=Bibliothèque nationale de France"
         )]
-        public void ResolveWikidataPrimaryReferences(string source, string articleLabel, string dateOfDeathRefs, string expectedSubstring)
+        public void ResolveWikidataReferences(string source, string articleLabel, string dateOfDeathRefs, string expectedSubstring)
         {
             Debug.WriteLine($"##### Testing source {source}...");
             var actualString = referenceResolver.Resolve(DateTime.MinValue, dateOfDeathRefs, articleLabel, null);
             Assert.Contains(expectedSubstring, actualString);
         }
 
-        // Websites IBDB, FemBio and Fichier des décès return status code 200 (+ redirect) instead of HttpStatusCode.NotFound (404) in case of a request to a non-existent url.
-        // So there is no need to check the validity of the url's regarding these websites
-        // TODO Brit, Indy, LoC, Snac, BNF (2); daarna flag chk
+        // Websites IBDB, FemBio, Fichier des décès and SNAC all return status code 200 (+ redirect) instead of HttpStatusCode.NotFound (404) in case of a request to a non-existent url.
+        // F.i. instead of 404 SNAC returns: 'Constellation with ark http://n2t.net/ark:/99166/NOTFOUND does not have a published version'.
+        // Also, GET requests to site of Bibliothèque nationale de France (BnF) always result in a 303 (redirect) Don't know why.
+        // Ergo: there is no need to check the validity of url's regarding these websites.
         [Theory(DisplayName = "Handle Wikidata 404 references")]
+        [InlineData(
+            "Encyclopædia Britannica Online (1)",
+            "enwiki~!Encyclopædia Britannica Online~!Encyclopædia Britannica Online ID: biography/NOTFOUND~!subject named as: Utpal Dutt"
+        )]
+        [InlineData(
+            "Encyclopædia Britannica Online (2)",
+            "enwiki~!reference URL: http://www.britannica.com/biography/NOTFOUND"
+        )]
+        [InlineData(
+            "Encyclopædia Britannica Online (3)",
+            "enwiki~!reference URL: https://www.britannica.com/biography/NOTFOUND"
+        )]
+        [InlineData(
+            "The Independent",
+            "enwiki~!reference URL: https://www.independent.co.uk/news/people/obituary-NOTFOUND.html"
+        )]
         [InlineData(
             "Spanish Biographical Dictionary (DB~e)",
             "Spanish Biographical Dictionary~!subject named as: Emilio Botín-Sanz de Sautuola y López~!Spanish Biographical Dictionary ID: NOTFOUND"
@@ -146,6 +163,10 @@ namespace WikipediaDeathsPages.Tests
             "Filmportal",
             "enwiki~!filmportal.de~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Gerry Sundquist~!Filmportal ID: NOTFOUND"
         )]
+        [InlineData(
+            "Library of Congress (LoC)",
+            "enwiki~!Library of Congress authority ID: NOTFOUND~!Library of Congress Authorities~!retrieved: 2019-12-16T00:00:00Z"
+        )]
         public void WikidataPrimaryReferenceNotFound(string source, string dateOfDeathRefs)
         {
             Debug.WriteLine($"##### Testing source {source}...");
@@ -153,22 +174,7 @@ namespace WikipediaDeathsPages.Tests
             Assert.Null(actualString);
         }
 
-
-
-
-        [Theory(DisplayName = "Resolve Wikidata secondary references")]
-        [InlineData(
-            "Library of Congress",
-            "Muhlis Akarsu",
-            "enwiki~!Library of Congress authority ID: no2017084878~!Library of Congress Authorities~!retrieved: 2020-03-05T00:00:00Z",
-            "title=Muhlis Akarsu - Library of Congress |url=https://id.loc.gov/authorities/names/no2017084878 |website=id.loc.gov"
-        )]
-        public void ResolveWikidataSecondaryReferences(string source, string articleLabel, string dateOfDeathRefs, string expectedSubstring)
-        {
-            Debug.WriteLine($"##### Testing source {source}...");
-            var actualString = referenceResolver.Resolve(DateTime.MinValue, dateOfDeathRefs, articleLabel, null);
-            Assert.Contains(expectedSubstring, actualString);
-        }
+        // TODO (sports sites)
 
 
         [Fact(DisplayName = "Resolve Olympic reference")]
@@ -178,7 +184,7 @@ namespace WikipediaDeathsPages.Tests
             var deathDate = new DateTime(2004, 1, 25);      
             wikipediaReferencesMock.Setup(_ => _.GetIdsOfName(name)).Returns(new List<int> { 73711 });
 
-            var expectedSubstring = $"title=Olympedia – {name} |url=http://www.olympedia.org/athletes/73711 |website=olympedia.org";
+            var expectedSubstring = $"title=Olympedia – {name} |url=https://www.olympedia.org/athletes/73711 |website=olympedia.org";
             var actualString = referenceResolver.Resolve(deathDate, null, name, "Olympics");
 
             Assert.Contains(expectedSubstring, actualString);

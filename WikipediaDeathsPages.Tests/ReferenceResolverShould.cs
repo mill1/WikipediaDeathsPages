@@ -43,11 +43,13 @@ namespace WikipediaDeathsPages.Tests
             const string url = "https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html";
             var deathDate = new DateTime(1993, 7, 28);
             var dateOfDeathRef = $"enwiki~!reference URL: {url}";
-            
-            var expectedSubstring = $"author1=Jim Reynolds |author-link1= |title=Obituary: Stanley Woods |url={url} |url-access= |access-date=8 June 2022 |work=[[The Independent]] |language= |date=30 July 1993";
+
+            var expectedSubstring1 = $"author1=Jim Reynolds |author-link1= |title=Obituary: Stanley Woods |url={url}";
+            var expectedSubstring2 = $"work=[[The Independent]] |language= |date=30 July 1993";
             var actualString = referenceResolver.Resolve(deathDate, dateOfDeathRef, name, null);
 
-            Assert.Contains(expectedSubstring, actualString);
+            Assert.Contains(expectedSubstring1, actualString);
+            Assert.Contains(expectedSubstring2, actualString);
         }
 
         [Fact(DisplayName = "Resolve Washington Post reference")]
@@ -82,9 +84,27 @@ namespace WikipediaDeathsPages.Tests
             "Biografisch Portaal~!Biografisch Portaal van Nederland ID: 26363517~!reference URL: http://www.biografischportaal.nl/persoon/26363517~!title: Peter Joseph Engels",
             "title=Piet Engels |url=http://www.biografischportaal.nl/persoon/26363517 |website=biografischportaal.nl"
         )]
+        [InlineData(
+            "FemBio",
+            "Catherine Collard",
+            "enwiki~!FemBio~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Cathérine Collard~!FemBio ID: 6165",
+            "title=Frauendatenbank fembio.org |url=https://www.fembio.org/biographie.php/frau/frauendatenbank?fem_id=6165 |website=fembio.org"
+        )]
+        [InlineData(
+            "Filmportal",
+            "Gerry Sundquist",
+            "enwiki~!filmportal.de~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Gerry Sundquist~!Filmportal ID: 8ec7d1f8c8774fd8bcac2d74b60413c2",
+            "title=Gerry Sundquist - filmportal.de |url=https://www.filmportal.de/person/8ec7d1f8c8774fd8bcac2d74b60413c2 |website=filmportal.de"
+        )]
+        [InlineData(
+            "Fichier des décès",
+            "Philippe Pradayrol",
+            "enwiki~!Fichier des personnes décédées~!retrieved: 2021-07-23T00:00:00Z~!reference URL: https://deces.matchid.io/id/Jwjy9PxtUQEm",
+            "title=matchID - Philippe Pradayrol |url=https://deces.matchid.io/id/Jwjy9PxtUQEm |website=[[Fichier des personnes décédées|Fichier des décès]]"
+        )]
         public void ResolveWikidataReferences(string source, string articleLabel, string dateOfDeathRefs, string expectedSubstring)
         {
-            Debug.Write($"Testing source {source}...");
+            Debug.WriteLine($"Testing source {source}...");
             var actualString = referenceResolver.Resolve(DateTime.MinValue, dateOfDeathRefs, articleLabel, null);
             Assert.Contains(expectedSubstring, actualString);
         }

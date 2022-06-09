@@ -50,7 +50,7 @@ namespace WikipediaDeathsPages.Service
         {
             var referenceItems = GetReferenceItems(dateOfDeathreferences);
 
-            // 1. Try get references from primary sources
+            // 1. Try get references from preferred sources stated in Wikidata
             var reference = GetReferenceFromWikidatRefItemsFirst(articleLabel, referenceItems, deathDate);
 
             if (reference == null)
@@ -58,7 +58,7 @@ namespace WikipediaDeathsPages.Service
                 reference = GetReferenceFromWebsites(articleLabel, knownFor, deathDate);
 
             if (reference == null)
-                // 3. Try get references from secondary sources
+                // 3. Try get references from secondary sources stated in Wikidata
                 reference = GetReferenceFromWikidatRefItemsSecond(articleLabel, referenceItems);
 
             return reference;
@@ -178,7 +178,7 @@ namespace WikipediaDeathsPages.Service
             // e.g.    https://www.where2golf.com/whos-who/payne-stewart/
             var url = "https://www.where2golf.com/whos-who/" + articleLabel.ToLower().Replace(" ", "-");
 
-            var response = DownloadString(url);
+            var response = DownloadString(url, true);
 
             if (response == null)
                 return null;
@@ -326,46 +326,23 @@ namespace WikipediaDeathsPages.Service
             if (WashingtonPostUrlFound(referenceItems, ref url))
                 return GenerateNewsReference($"Obituary {articleLabel}", url, "", DateTime.Today, "[[The Washington Post]]", DateTime.MinValue, "[[Associated Press]]");
 
-
             if (IBDBUrlFound(referenceItems, ref url))
-            {
-                if (DownloadString(url) == null)
-                    return null;
-
                 return GenerateWebReference($"{articleLabel} - Broadway Cast & Staff - IBDB", url, "ibdb.com", DateTime.Today, DateTime.MinValue);
-            }
 
             if (DbeUrlFound(referenceItems, ref url))
-            {
-                if (DownloadString(url) == null)
-                    return null;
-
-                return GenerateWebReference($"{articleLabel} - DB~e", url, "dbe.rah.es", DateTime.Today, DateTime.MinValue, language: "Spanish", publisher: "Real Academia de la Historia");
-            }
+                return GenerateWebReference($"{articleLabel} - DB~e", url, "dbe.rah.es", DateTime.Today, DateTime.MinValue, language: "es", publisher: "Real Academia de la Historia");
 
             if (BiografischPortaalUrlFound(referenceItems, ref url))
-            {
-                if (DownloadString(url) == null)
-                    return null;
-
-                return GenerateWebReference(articleLabel, url, "biografischportaal.nl", DateTime.Today, DateTime.MinValue, language: "Dutch");
-            }
+                return GenerateWebReference(articleLabel, url, "biografischportaal.nl", DateTime.Today, DateTime.MinValue, language: "nl");
 
             if (FemBioUrlFound(referenceItems, ref url))
-            {
-                if (DownloadString(url) == null)
-                    return null;
-
-                return GenerateWebReference("Frauendatenbank fembio.org", url, "fembio.org", DateTime.Today, DateTime.MinValue, language: "German");
-            }
+                return GenerateWebReference("Frauendatenbank fembio.org", url, "fembio.org", DateTime.Today, DateTime.MinValue, language: "de");
 
             if (FilmportalUrlFound(referenceItems, ref url))
-            {
-                if (DownloadString(url) == null)
-                    return null;
+                return GenerateWebReference($"{articleLabel} - filmportal.de", url, "filmportal.de", DateTime.Today, DateTime.MinValue, language: "de");
 
-                return GenerateWebReference($"{articleLabel} - filmportal.de", url, "filmportal.de", DateTime.Today, DateTime.MinValue, language: "German");
-            }
+            if (DecesUrlFound(referenceItems, ref url))
+                return GenerateWebReference($"matchID - {articleLabel}", url, "[[Fichier des personnes décédées|Fichier des décès]]", DateTime.Today, DateTime.MinValue, language: "fr");
 
             return null;
         }
@@ -389,7 +366,7 @@ namespace WikipediaDeathsPages.Service
 
         private string GenerateBrittanicaWebReference(string articleLabel, string url, DateTime deathDate)
         {
-            var response = DownloadString(url);
+            var response = DownloadString(url, true);
 
             if (response == null)
                 return null;
@@ -409,16 +386,16 @@ namespace WikipediaDeathsPages.Service
             string url = null;
             string website = null;
 
-            // Resolve in preferred order of sources            
-
-            if (BnFUrlFound(referenceItems, ref url, ref website))
-                return GenerateWebReference(articleLabel, url, website, DateTime.Today, DateTime.MinValue, publisher: "Bibliothèque nationale de France", language: "French");
+            // Resolve in preferred order of sources                        
 
             if (LoCUrlFound(referenceItems, ref url))
                 return GenerateWebReference($"{articleLabel} - Library of Congress", url, "id.loc.gov", DateTime.Today, DateTime.MinValue);
 
             if (SnacUrlFound(referenceItems, ref url))
                 return GenerateWebReference($"{articleLabel} - Social Networks and Archival Context", url, "snaccooperative.org", DateTime.Today, DateTime.MinValue);
+
+            if (BnFUrlFound(referenceItems, ref url, ref website))
+                return GenerateWebReference(articleLabel, url, website, DateTime.Today, DateTime.MinValue, publisher: "Bibliothèque nationale de France", language: "French");
 
             return null;
         }
@@ -452,7 +429,7 @@ namespace WikipediaDeathsPages.Service
         private bool BiografischPortaalUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. http://www.biografischportaal.nl/persoon/87547041
-            return ReferenceUrlFound(@"http://www.biografischportaal.nl/persoon/", referenceItems, ref referenceUrl);
+            return ReferenceUrlFound("http://www.biografischportaal.nl/persoon/", referenceItems, ref referenceUrl);
         }
 
         private bool IBDBUrlFound(List<string> referenceItems, ref string referenceUrl)
@@ -479,6 +456,24 @@ namespace WikipediaDeathsPages.Service
             return ReferenceUrlIdFound("Filmportal ID: ", @"https://www.filmportal.de/person/", referenceItems, ref referenceUrl);
         }
 
+        private bool DecesUrlFound(List<string> referenceItems, ref string referenceUrl)
+        {
+            // e.g. https://deces.matchid.io/id/Jwjy9PxtUQEm
+            return ReferenceUrlFound("https://deces.matchid.io/id/", referenceItems, ref referenceUrl);
+        }
+
+        private bool LoCUrlFound(List<string> referenceItems, ref string referenceUrl)
+        {
+            // e.g. https://id.loc.gov/authorities/names/n84163016.html
+            return ReferenceUrlIdFound("Library of Congress authority ID: ", @"https://id.loc.gov/authorities/names/", referenceItems, ref referenceUrl);
+        }
+
+        private bool SnacUrlFound(List<string> referenceItems, ref string referenceUrl)
+        {
+            // https://snaccooperative.org/ark:/99166/w6xn23d4
+            return ReferenceUrlIdFound("SNAC ARK ID: ", @"https://snaccooperative.org/ark:/99166/", referenceItems, ref referenceUrl);
+        }
+
         private bool BnFUrlFound(List<string> referenceItems, ref string referenceUrl, ref string website)
         {
             // e.g http://data.bnf.fr/ark:/12148/cb13993433s
@@ -493,9 +488,11 @@ namespace WikipediaDeathsPages.Service
                 //  Bibliothèque nationale de France ID: 12097177v
                 foreach (var item in referenceItems)
                 {
-                    if (item.StartsWith("Bibliothèque nationale de France ID: "))
+                    const string idLabel = "Bibliothèque nationale de France ID: ";
+
+                    if (item.StartsWith(idLabel))
                     {
-                        var id = item.Substring("Bibliothèque nationale de France ID: ".Length);
+                        var id = item.Substring(idLabel.Length);
                         referenceUrl = "https://catalogue.bnf.fr/ark:/12148/cb" + id;
                         website = "catalogue.bnf.fr";
                         return true;
@@ -503,19 +500,6 @@ namespace WikipediaDeathsPages.Service
                 }
             }
             return false;
-        }
-
-        private bool LoCUrlFound(List<string> referenceItems, ref string referenceUrl)
-        {
-            // e.g. https://id.loc.gov/authorities/names/n84163016.html
-            return ReferenceUrlIdFound("Library of Congress authority ID: ", @"https://id.loc.gov/authorities/names/", referenceItems, ref referenceUrl);
-        }
-
-
-        private bool SnacUrlFound(List<string> referenceItems, ref string referenceUrl)
-        {
-            // https://snaccooperative.org/ark:/99166/w6xn23d4
-            return ReferenceUrlIdFound("SNAC ARK ID: ", @"https://snaccooperative.org/ark:/99166/", referenceItems, ref referenceUrl);
         }
 
         private bool ReferenceUrlIdFound(string IdStartsWith, string urlStart, List<string> referenceItems, ref string referenceUrl)
@@ -526,6 +510,10 @@ namespace WikipediaDeathsPages.Service
                 {
                     var snacId = item.Substring(IdStartsWith.Length);
                     referenceUrl = urlStart + snacId;
+
+                    if (DownloadString(referenceUrl, false) == null)
+                        return false;
+
                     return true;
                 }
             }
@@ -539,6 +527,10 @@ namespace WikipediaDeathsPages.Service
                 if (item.StartsWith($@"reference URL: {urlStartsWith}"))
                 {
                     referenceUrl = item.Substring("reference URL: ".Length);
+
+                    if (DownloadString(referenceUrl, false) == null)
+                        return false;
+
                     return true;
                 }
             }
@@ -628,7 +620,7 @@ namespace WikipediaDeathsPages.Service
             return dateOfDeathReferences.Split("~!").ToList();
         }
 
-        private string DownloadString(string url)
+        private string DownloadString(string url, bool throwException)
         {
             try
             {
@@ -639,7 +631,12 @@ namespace WikipediaDeathsPages.Service
                 if (((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.NotFound)
                     return null;
                 else
-                    throw;
+                {
+                    if (throwException)
+                        throw;
+
+                    return null;
+                }                    
             }
         }
     }

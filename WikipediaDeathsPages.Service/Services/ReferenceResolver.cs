@@ -397,7 +397,7 @@ namespace WikipediaDeathsPages.Service
 
             // http://www.britannica.com/EBchecked/topic/18816/Viktor-Amazaspovich-Ambartsumian
             // TODO true?
-            if (ReferenceUrlFound("http://www.britannica.com", referenceItems, true, ref referenceUrl))    // oud: http://
+            if (ReferenceUrlFound("http://www.britannica.com", referenceItems, true, ref referenceUrl))    // oud in Wikidata: http://
                 return true;
 
             // https://www.britannica.com/biography/Donald-Alfred-Davie
@@ -413,7 +413,7 @@ namespace WikipediaDeathsPages.Service
 
         private bool BiografischPortaalUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
-            // e.g. http://www.biografischportaal.nl/persoon/87547041
+            // e.g. http://www.biografischportaal.nl/persoon/87547041  // nog steeds http:// https levert warning op (Chrome)
             return ReferenceUrlFound("http://www.biografischportaal.nl/persoon/", referenceItems, true, ref referenceUrl);
         }
 
@@ -461,29 +461,36 @@ namespace WikipediaDeathsPages.Service
 
         private bool BnFUrlFound(List<string> referenceItems, ref string referenceUrl, ref string website)
         {
-            // e.g http://data.bnf.fr/ark:/12148/cb13993433s  oud; is nu https
-            if (ReferenceUrlFound("http://data.bnf.fr/ark:/12148/", referenceItems, true, ref referenceUrl))
+            // TODO: 2 testen
+            // e.g http://data.bnf.fr/ark:/12148/cb13993433s     // oud in Wikidata: http://
+            if (ReferenceUrlFound("http://data.bnf.fr/ark:/12148/", referenceItems, false, ref referenceUrl))  // false: request results in 303 response (redirect)
             {
                 website = "data.bnf.fr";
                 return true;
             }
-            else
-            {
-                // e.g. https://catalogue.bnf.fr/ark:/12148/cb12097177v
-                //  Bibliothèque nationale de France ID: 12097177v
-                foreach (var item in referenceItems)
-                {
-                    const string idLabel = "Bibliothèque nationale de France ID: ";
 
-                    if (item.StartsWith(idLabel))
-                    {
-                        var id = item.Substring(idLabel.Length);
-                        referenceUrl = "https://catalogue.bnf.fr/ark:/12148/cb" + id;
-                        website = "catalogue.bnf.fr";
-                        return true;
-                    }
+            // e.g https://data.bnf.fr/ark:/12148/cb13993433s    //  https://
+            if (ReferenceUrlFound("https://data.bnf.fr/ark:/12148/", referenceItems, false, ref referenceUrl)) // false: request results in 303 response (redirect)
+            {
+                website = "data.bnf.fr";
+                return true;
+            }
+
+            // e.g. https://catalogue.bnf.fr/ark:/12148/cb12097177v
+            //  Bibliothèque nationale de France ID: 12097177v
+            foreach (var item in referenceItems)
+            {
+                const string idLabel = "Bibliothèque nationale de France ID: ";
+
+                if (item.StartsWith(idLabel))
+                {
+                    var id = item.Substring(idLabel.Length);
+                    referenceUrl = "https://catalogue.bnf.fr/ark:/12148/cb" + id;
+                    website = "catalogue.bnf.fr";
+                    return true;
                 }
             }
+
             return false;
         }
 

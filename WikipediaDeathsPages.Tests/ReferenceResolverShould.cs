@@ -48,45 +48,81 @@ namespace WikipediaDeathsPages.Tests
         [InlineData(
             "Encyclopædia Britannica Online (2)",
             "Donald Davie",
+            "enwiki~!reference URL: http://www.britannica.com/biography/Donald-Alfred-Davie",
+            "title=Donald Davie |url=http://www.britannica.com/biography/Donald-Alfred-Davie |website=britannica.com"
+        )]
+        [InlineData(
+            "Encyclopædia Britannica Online (3)",
+            "Donald Davie",
             "enwiki~!reference URL: https://www.britannica.com/biography/Donald-Alfred-Davie",
             "title=Donald Davie |url=https://www.britannica.com/biography/Donald-Alfred-Davie |website=britannica.com"
         )]
-        //[InlineData(
-        //    "Internet Broadway Database (IBDB)",
-        //    "Tom Fuccello",
-        //    "enwiki~!Internet Broadway Database~!retrieved: 2017-10-09T00:00:00Z~!Internet Broadway Database person ID: 88297~!subject named as: Tom Fuccello",
-        //    "title=Tom Fuccello - Broadway Cast & Staff - IBDB |url=https://www.ibdb.com/broadway-cast-staff/88297 |website=ibdb.com"
-        //)]
-        //[InlineData(
-        //    "Spanish Biographical Dictionary (DB~e)",
-        //    "Emilio Botín",
-        //    "Spanish Biographical Dictionary~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Emilio Botín-Sanz de Sautuola y López~!Spanish Biographical Dictionary ID: 19291/emilio-botin-sanz-de-sautuola-y-lopez",
-        //    "title=Emilio Botín - DB~e |url=https://dbe.rah.es/biografias/19291/emilio-botin-sanz-de-sautuola-y-lopez |website=dbe.rah.es |publisher=Real Academia de la Historia"
-        //)]
-        //[InlineData(
-        //    "Biografisch Portaal",
-        //    "Piet Engels",
-        //    "Biografisch Portaal~!Biografisch Portaal van Nederland ID: 26363517~!reference URL: http://www.biografischportaal.nl/persoon/26363517~!title: Peter Joseph Engels",
-        //    "title=Piet Engels |url=http://www.biografischportaal.nl/persoon/26363517 |website=biografischportaal.nl"
-        //)]
-        //[InlineData(
-        //    "FemBio",
-        //    "Catherine Collard",
-        //    "enwiki~!FemBio~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Cathérine Collard~!FemBio ID: 6165",
-        //    "title=Frauendatenbank fembio.org |url=https://www.fembio.org/biographie.php/frau/frauendatenbank?fem_id=6165 |website=fembio.org"
-        //)]
-        //[InlineData(
-        //    "Filmportal",
-        //    "Gerry Sundquist",
-        //    "enwiki~!filmportal.de~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Gerry Sundquist~!Filmportal ID: 8ec7d1f8c8774fd8bcac2d74b60413c2",
-        //    "title=Gerry Sundquist - filmportal.de |url=https://www.filmportal.de/person/8ec7d1f8c8774fd8bcac2d74b60413c2 |website=filmportal.de"
-        //)]
-        //[InlineData(
-        //    "Fichier des décès",
-        //    "Philippe Pradayrol",
-        //    "enwiki~!Fichier des personnes décédées~!retrieved: 2021-07-23T00:00:00Z~!reference URL: https://deces.matchid.io/id/Jwjy9PxtUQEm",
-        //    "title=matchID - Philippe Pradayrol |url=https://deces.matchid.io/id/Jwjy9PxtUQEm |website=[[Fichier des personnes décédées|Fichier des décès]]"
-        //)]
+        [InlineData(
+            "Internet Broadway Database (IBDB)",
+            "Tom Fuccello",
+            "enwiki~!Internet Broadway Database~!retrieved: 2017-10-09T00:00:00Z~!Internet Broadway Database person ID: 88297~!subject named as: Tom Fuccello",
+            "title=Tom Fuccello - Broadway Cast & Staff - IBDB |url=https://www.ibdb.com/broadway-cast-staff/88297 |website=ibdb.com"
+        )]
+        [InlineData(
+            "Spanish Biographical Dictionary (DB~e)",
+            "Emilio Botín",
+            "Spanish Biographical Dictionary~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Emilio Botín-Sanz de Sautuola y López~!Spanish Biographical Dictionary ID: 19291/emilio-botin-sanz-de-sautuola-y-lopez",
+            "title=Emilio Botín - DB~e |url=https://dbe.rah.es/biografias/19291/emilio-botin-sanz-de-sautuola-y-lopez |website=dbe.rah.es |publisher=Real Academia de la Historia"
+        )]
+        [InlineData(
+            "Biografisch Portaal",
+            "Piet Engels",
+            "Biografisch Portaal~!Biografisch Portaal van Nederland ID: 26363517~!reference URL: http://www.biografischportaal.nl/persoon/26363517~!title: Peter Joseph Engels",
+            "title=Piet Engels |url=http://www.biografischportaal.nl/persoon/26363517 |website=biografischportaal.nl"
+        )]
+        [InlineData(
+            "FemBio",
+            "Catherine Collard",
+            "enwiki~!FemBio~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Cathérine Collard~!FemBio ID: 6165",
+            "title=Frauendatenbank fembio.org |url=https://www.fembio.org/biographie.php/frau/frauendatenbank?fem_id=6165 |website=fembio.org"
+        )]
+        [InlineData(
+            "Filmportal",
+            "Gerry Sundquist",
+            "enwiki~!filmportal.de~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Gerry Sundquist~!Filmportal ID: 8ec7d1f8c8774fd8bcac2d74b60413c2",
+            "title=Gerry Sundquist - filmportal.de |url=https://www.filmportal.de/person/8ec7d1f8c8774fd8bcac2d74b60413c2 |website=filmportal.de"
+        )]
+        [InlineData(
+            "Fichier des décès",
+            "Philippe Pradayrol",
+            "enwiki~!Fichier des personnes décédées~!retrieved: 2021-07-23T00:00:00Z~!reference URL: https://deces.matchid.io/id/Jwjy9PxtUQEm",
+            "title=matchID - Philippe Pradayrol |url=https://deces.matchid.io/id/Jwjy9PxtUQEm |website=[[Fichier des personnes décédées|Fichier des décès]]"
+        )]
+        [InlineData(
+            "Library of Congress (LoC)",
+            "John Brooks",
+            "enwiki~!Library of Congress authority ID: n79063009~!Library of Congress Authorities~!retrieved: 2019-12-16T00:00:00Z",
+            "title=John Brooks - Library of Congress |url=https://id.loc.gov/authorities/names/n79063009 |website=id.loc.gov"
+        )]
+        [InlineData(
+            "Social Networks and Archival Context (snac)",
+            "Eric Irvin",
+            "enwiki~!SNAC~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Eric Irvin~!SNAC ARK ID: w62z2kg5",
+            "title=Eric Irvin - Social Networks and Archival Context |url=https://snaccooperative.org/ark:/99166/w62z2kg5 |website=snaccooperative.org"
+        )]
+        [InlineData(
+            "Bibliothèque nationale de France (BnF) (1)",
+            "Irving J. Moore",
+            "enwiki~!BnF authorities~!retrieved: 2015-10-10T00:00:00Z~!reference URL: http://data.bnf.fr/ark:/12148/cb14122678c",
+            "title=Irving J. Moore |url=http://data.bnf.fr/ark:/12148/cb14122678c |website=data.bnf.fr |publisher=Bibliothèque nationale de France"
+        )]
+        [InlineData(
+            "Bibliothèque nationale de France (BnF) (2)",
+            "Red Prysock",
+            "enwiki~!BnF authorities~!retrieved: 2015-10-10T00:00:00Z~!reference URL: https://data.bnf.fr/ark:/12148/cb13968003b",
+            "title=Red Prysock |url=https://data.bnf.fr/ark:/12148/cb13968003b |website=data.bnf.fr |publisher=Bibliothèque nationale de France"
+        )]
+        [InlineData(
+            "Bibliothèque nationale de France (BnF) (3)",
+            "Isabela Corona",
+            "BnF authorities~!Bibliothèque nationale de France ID: 15531676g~!subject named as: Isabela Corona",
+            "title=Isabela Corona |url=https://catalogue.bnf.fr/ark:/12148/cb15531676g |website=catalogue.bnf.fr |publisher=Bibliothèque nationale de France"
+        )]
         public void ResolveWikidataPrimaryReferences(string source, string articleLabel, string dateOfDeathRefs, string expectedSubstring)
         {
             Debug.WriteLine($"##### Testing source {source}...");
@@ -96,6 +132,7 @@ namespace WikipediaDeathsPages.Tests
 
         // Websites IBDB, FemBio and Fichier des décès return status code 200 (+ redirect) instead of HttpStatusCode.NotFound (404) in case of a request to a non-existent url.
         // So there is no need to check the validity of the url's regarding these websites
+        // TODO Brit, Indy, LoC, Snac, BNF (2); daarna flag chk
         [Theory(DisplayName = "Handle Wikidata 404 references")]
         [InlineData(
             "Spanish Biographical Dictionary (DB~e)",

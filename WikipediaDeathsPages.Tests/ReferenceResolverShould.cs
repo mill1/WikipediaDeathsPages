@@ -131,7 +131,7 @@ namespace WikipediaDeathsPages.Tests
         }
 
         // Websites IBDB, FemBio, Fichier des décès and SNAC all return status code 200 (+ redirect) instead of HttpStatusCode.NotFound (404) in case of a request to a non-existent url.
-        // F.i. instead of 404 SNAC returns: 'Constellation with ark http://n2t.net/ark:/99166/NOTFOUND does not have a published version'.
+        // F.i. instead of a 404 status code SNAC returns a 200 code: 'Constellation with ark http://n2t.net/ark:/99166/NOTFOUND does not have a published version'.
         // Also, GET requests to site of Bibliothèque nationale de France (BnF) always result in a 303 (redirect) Don't know why.
         // Ergo: there is no need to check the validity of url's regarding these websites.
         [Theory(DisplayName = "Handle Wikidata 404 references")]
@@ -175,6 +175,19 @@ namespace WikipediaDeathsPages.Tests
         }
 
         // TODO (sports sites)
+        // Check multiple occurrences name
+
+        [Fact(DisplayName = "Resolve Baseball reference")]
+        public void ResolveBaseballReference()
+        {
+            const string name = "Tsunemi Tsuda";
+            var deathDate = new DateTime(1993, 7, 20);            
+
+            var expectedSubstring = "title=Tsunemi Tsuda Stats - Baseball-Reference.com |url=https://www.baseball-reference.com/search/search.fcgi?search=Tsunemi+Tsuda |website=baseball-reference.com";
+            var actualString = referenceResolver.Resolve(deathDate, null, name, "Baseball");
+
+            Assert.Contains(expectedSubstring, actualString);
+        }
 
 
         [Fact(DisplayName = "Resolve Olympic reference")]

@@ -41,12 +41,11 @@ namespace WikipediaDeathsPages.Service
         {
             this.wikipediaReferences = wikipediaReferences;
             this.logger = logger;
-#pragma warning disable S2930 // "IDisposables" should be disposed
+            cultureInfo = new CultureInfo("en-US");
+
             webClient = new WebClient();
             webClient.Headers.Clear();
             webClient.Headers.Add("User-Agent", "C# application");
-#pragma warning restore S2930 // "IDisposables" should be disposed
-            cultureInfo = new CultureInfo("en-US");
         }
 
         public string Resolve(DateTime deathDate, string dateOfDeathreferences, string articleLabel, string knownFor)
@@ -207,6 +206,7 @@ namespace WikipediaDeathsPages.Service
             }
             catch (Exception e)
             {
+                // TODO?
                 // This crappy site returns a 301 (and shows a 500) in case of a 404...
                 logger.LogTrace($"{e.Message} article: {articleLabel} Url: {url}", e);
                 return null;
@@ -229,6 +229,7 @@ namespace WikipediaDeathsPages.Service
             {
                 response = webClient.DownloadString(searchUrl);
             }
+            // TODO refactor
             catch (WebException e)
             {
                 if (((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.InternalServerError)
@@ -383,7 +384,6 @@ namespace WikipediaDeathsPages.Service
 
             return null;
         }
-
 
 #pragma warning disable S1135 // Track uses of "TODO" tags
         // TODO create button to check websites to have not been checked already: 

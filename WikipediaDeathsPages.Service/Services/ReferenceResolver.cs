@@ -13,6 +13,7 @@ using WikipediaDeathsPages.Service.Interfaces;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
 using WikipediaDeathsPages.Service.Models;
+using System.Net.Http;
 
 /*
 Loop eerst door de 'referenties'
@@ -42,6 +43,8 @@ namespace WikipediaDeathsPages.Service
             this.logger = logger;
 #pragma warning disable S2930 // "IDisposables" should be disposed
             webClient = new WebClient();
+            webClient.Headers.Clear();
+            webClient.Headers.Add("User-Agent", "C# application");
 #pragma warning restore S2930 // "IDisposables" should be disposed
             cultureInfo = new CultureInfo("en-US");
         }
@@ -112,8 +115,6 @@ namespace WikipediaDeathsPages.Service
 
         private string GetOlympediaReference(string articleLabel, DateTime deathDate)
         {
-            
-
             List<string> names = GetNameAlternatives(articleLabel);
 
             foreach (var name in names)
@@ -124,8 +125,8 @@ namespace WikipediaDeathsPages.Service
                 {
                     foreach (var id in OlympediaIds)
                     {
-                        // e.g.    http://www.olympedia.org/athletes/73711
-                        var url = "http://www.olympedia.org/athletes/" + id;
+                        // e.g.    https://www.olympedia.org/athletes/73711
+                        var url = "https://www.olympedia.org/athletes/" + id;
                         var response = webClient.DownloadString(url);                        
 
                         if (response.Contains(GetLongEnDateText(deathDate)))
@@ -303,7 +304,7 @@ namespace WikipediaDeathsPages.Service
 
             // Resolve in preferred order of sources            
             if (BritannicaUrlFound(referenceItems, ref url))
-                return GenerateBrittanicaWebReference(articleLabel, url, deathDate);
+                return GenerateWebReference(articleLabel, url, "britannica.com", DateTime.Today, DateTime.MinValue, publisher: "Encyclopædia Britannica Online");
 
             if (IndependentUrlFound(referenceItems, ref url))
             {
@@ -322,9 +323,6 @@ namespace WikipediaDeathsPages.Service
 
                 return GenerateNewsReference(data.article_title, url, "", DateTime.Today, "[[The Independent]]", pubdate, data.article_author);
             }
-
-            if (WashingtonPostUrlFound(referenceItems, ref url))
-                return GenerateNewsReference($"Obituary {articleLabel}", url, "", DateTime.Today, "[[The Washington Post]]", DateTime.MinValue, "[[Associated Press]]");
 
             if (IBDBUrlFound(referenceItems, ref url))
                 return GenerateWebReference($"{articleLabel} - Broadway Cast & Staff - IBDB", url, "ibdb.com", DateTime.Today, DateTime.MinValue);
@@ -364,20 +362,6 @@ namespace WikipediaDeathsPages.Service
             return data;
         }
 
-        private string GenerateBrittanicaWebReference(string articleLabel, string url, DateTime deathDate)
-        {
-            var response = DownloadString(url, true);
-
-            if (response == null)
-                return null;
-
-            // e.g. <span class="fact-item">July 27, 1996 (aged 85)</span>
-            if (response.Contains(deathDate.ToString("MMMM d, yyyy", cultureInfo) + " (aged "))
-                return GenerateWebReference(articleLabel, url, "britannica.com", DateTime.Today, DateTime.MinValue, publisher: "Encyclopædia Britannica Online");
-
-            return null;
-        }
-
         private string GetReferenceFromWikidatRefItemsSecond(string articleLabel, List<string> referenceItems)
         {
             if (!referenceItems.Any())
@@ -407,77 +391,78 @@ namespace WikipediaDeathsPages.Service
         private bool BritannicaUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // https://www.britannica.com/biography/S-J-Perelman
-            if (ReferenceUrlIdFound("Encyclopædia Britannica Online ID: biography/", @"https://www.britannica.com/biography/", referenceItems, ref referenceUrl))
+            // TODO true?
+            if (ReferenceUrlIdFound("Encyclopædia Britannica Online ID: biography/", @"https://www.britannica.com/biography/", referenceItems, true, ref referenceUrl))
                 return true;
 
             // http://www.britannica.com/EBchecked/topic/18816/Viktor-Amazaspovich-Ambartsumian
-            return ReferenceUrlFound("http://www.britannica.com", referenceItems, ref referenceUrl);
-        }
+            // TODO true?
+            if (ReferenceUrlFound("http://www.britannica.com", referenceItems, true, ref referenceUrl))    // oud: http://
+                return true;
 
-        private bool WashingtonPostUrlFound(List<string> referenceItems, ref string referenceUrl)
-        {
-            // e.g. https://www.washingtonpost.com/archive/local/1996/01/15/jon-pattis-58-dies/06d38941-a1f0-4c39-ab05-35ee68e362e2/
-            return ReferenceUrlFound("https://www.washingtonpost.com/archive/", referenceItems, ref referenceUrl);
+            // https://www.britannica.com/biography/Donald-Alfred-Davie
+            return ReferenceUrlFound("https://www.britannica.com", referenceItems, true, ref referenceUrl); // https://
         }
 
         private bool IndependentUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html
-            return ReferenceUrlFound("https://www.independent.co.uk/news/people/", referenceItems, ref referenceUrl);
+            // TODO true?
+            return ReferenceUrlFound("https://www.independent.co.uk/news/people/", referenceItems, true, ref referenceUrl);
         }
 
         private bool BiografischPortaalUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. http://www.biografischportaal.nl/persoon/87547041
-            return ReferenceUrlFound("http://www.biografischportaal.nl/persoon/", referenceItems, ref referenceUrl);
+            return ReferenceUrlFound("http://www.biografischportaal.nl/persoon/", referenceItems, true, ref referenceUrl);
         }
 
         private bool IBDBUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. https://www.ibdb.com/broadway-cast-staff/tom-fuccello-88297
-            return ReferenceUrlIdFound("Internet Broadway Database person ID: ", @"https://www.ibdb.com/broadway-cast-staff/", referenceItems, ref referenceUrl);
+            return ReferenceUrlIdFound("Internet Broadway Database person ID: ", @"https://www.ibdb.com/broadway-cast-staff/", referenceItems, false, ref referenceUrl);
         }
 
         private bool DbeUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. https://dbe.rah.es/biografias/27266/xose-fernando-filgueira-valverde
-            return ReferenceUrlIdFound("Spanish Biographical Dictionary ID: ", @"https://dbe.rah.es/biografias/", referenceItems, ref referenceUrl);
+            return ReferenceUrlIdFound("Spanish Biographical Dictionary ID: ", @"https://dbe.rah.es/biografias/", referenceItems, true, ref referenceUrl);
         }
 
         private bool FemBioUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. https://www.fembio.org/biographie.php/frau/frauendatenbank?fem_id=1560
-            return ReferenceUrlIdFound("FemBio ID: ", @"https://www.fembio.org/biographie.php/frau/frauendatenbank?fem_id=", referenceItems, ref referenceUrl);
+            return ReferenceUrlIdFound("FemBio ID: ", @"https://www.fembio.org/biographie.php/frau/frauendatenbank?fem_id=", referenceItems, false, ref referenceUrl);
         }
 
         private bool FilmportalUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. https://www.filmportal.de/person/074db5fd4d494c69819053afc4222a5c
-            return ReferenceUrlIdFound("Filmportal ID: ", @"https://www.filmportal.de/person/", referenceItems, ref referenceUrl);
+            return ReferenceUrlIdFound("Filmportal ID: ", @"https://www.filmportal.de/person/", referenceItems, true, ref referenceUrl);
         }
 
         private bool DecesUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. https://deces.matchid.io/id/Jwjy9PxtUQEm
-            return ReferenceUrlFound("https://deces.matchid.io/id/", referenceItems, ref referenceUrl);
+            return ReferenceUrlFound("https://deces.matchid.io/id/", referenceItems, false, ref referenceUrl);
         }
 
         private bool LoCUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. https://id.loc.gov/authorities/names/n84163016.html
-            return ReferenceUrlIdFound("Library of Congress authority ID: ", @"https://id.loc.gov/authorities/names/", referenceItems, ref referenceUrl);
+            return ReferenceUrlIdFound("Library of Congress authority ID: ", @"https://id.loc.gov/authorities/names/", referenceItems, true, ref referenceUrl);
         }
 
         private bool SnacUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // https://snaccooperative.org/ark:/99166/w6xn23d4
-            return ReferenceUrlIdFound("SNAC ARK ID: ", @"https://snaccooperative.org/ark:/99166/", referenceItems, ref referenceUrl);
+            return ReferenceUrlIdFound("SNAC ARK ID: ", @"https://snaccooperative.org/ark:/99166/", referenceItems, true, ref referenceUrl);
         }
 
         private bool BnFUrlFound(List<string> referenceItems, ref string referenceUrl, ref string website)
         {
-            // e.g http://data.bnf.fr/ark:/12148/cb13993433s
-            if (ReferenceUrlFound("http://data.bnf.fr/ark:/12148/", referenceItems, ref referenceUrl))
+            // e.g http://data.bnf.fr/ark:/12148/cb13993433s  oud; is nu https
+            if (ReferenceUrlFound("http://data.bnf.fr/ark:/12148/", referenceItems, true, ref referenceUrl))
             {
                 website = "data.bnf.fr";
                 return true;
@@ -502,17 +487,18 @@ namespace WikipediaDeathsPages.Service
             return false;
         }
 
-        private bool ReferenceUrlIdFound(string IdStartsWith, string urlStart, List<string> referenceItems, ref string referenceUrl)
+        private bool ReferenceUrlIdFound(string IdStartsWith, string urlStart, List<string> referenceItems, bool checkUrl, ref string referenceUrl)
         {
             foreach (var item in referenceItems)
             {
                 if (item.StartsWith(IdStartsWith))
                 {
-                    var snacId = item.Substring(IdStartsWith.Length);
-                    referenceUrl = urlStart + snacId;
+                    var id = item.Substring(IdStartsWith.Length);
+                    referenceUrl = urlStart + id;
 
-                    if (DownloadString(referenceUrl, false) == null)
-                        return false;
+                    if (checkUrl) // not all sites return a 404 in case of NotFound. See corr. tests
+                        if (DownloadString(referenceUrl, false) == null)
+                            return false;
 
                     return true;
                 }
@@ -520,16 +506,17 @@ namespace WikipediaDeathsPages.Service
             return false;
         }
 
-        private bool ReferenceUrlFound(string urlStartsWith, List<string> referenceItems, ref string referenceUrl)
+        private bool ReferenceUrlFound(string urlStartsWith, List<string> referenceItems, bool checkUrl, ref string referenceUrl)
         {
             foreach (var item in referenceItems)
             {
                 if (item.StartsWith($@"reference URL: {urlStartsWith}"))
                 {
                     referenceUrl = item.Substring("reference URL: ".Length);
-
-                    if (DownloadString(referenceUrl, false) == null)
-                        return false;
+                    
+                    if (checkUrl) // not all sites return a 404 in case of NotFound. See corr. tests
+                        if (DownloadString(referenceUrl, false) == null)
+                            return false;
 
                     return true;
                 }
@@ -624,7 +611,8 @@ namespace WikipediaDeathsPages.Service
         {
             try
             {
-                return webClient.DownloadString(url);
+                var response = webClient.DownloadString(url);
+                return response;
             }
             catch (WebException e)
             {
@@ -637,6 +625,11 @@ namespace WikipediaDeathsPages.Service
 
                     return null;
                 }                    
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
             }
         }
     }

@@ -55,15 +55,17 @@ namespace WikipediaDeathsPages.Service
             // 1. Try get references from preferred sources stated in Wikidata
             var reference = GetReferenceFromWikidatRefItemsFirst(articleLabel, referenceItems, deathDate);
 
-            if (reference == null)
-                // 2. Try get references from (sports) websites
-                reference = GetReferenceFromWebsites(articleLabel, knownFor, deathDate);
+            if (reference != null)
+                return reference;
 
-            if (reference == null)
-                // 3. Try get references from secondary sources stated in Wikidata
-                reference = GetReferenceFromWikidatRefItemsSecond(articleLabel, referenceItems);
+            // 2. Try get references from (sports) websites
+            reference = GetReferenceFromWebsites(articleLabel, knownFor, deathDate);
 
-            return reference;
+            if (reference != null)
+                return reference;
+
+            // 3. Try get references from secondary sources stated in Wikidata
+            return GetReferenceFromWikidatRefItemsSecond(articleLabel, referenceItems);
         }
 
         private string GetReferenceFromWebsites(string articleLabel, string knownFor, DateTime deathDate)
@@ -78,7 +80,7 @@ namespace WikipediaDeathsPages.Service
                     return GetBasketballReference(articleLabel, deathDate);
                 case "Hockey":
                     return GetHockeyReference(articleLabel, deathDate);
-                case "Olympics":
+                case "Olympics": 
                     return GetOlympediaReference(articleLabel, deathDate);
                 case "Association football":
                     return GetAssociationFootballReference(articleLabel, deathDate);
@@ -126,7 +128,10 @@ namespace WikipediaDeathsPages.Service
                     {
                         // e.g.    https://www.olympedia.org/athletes/73711
                         var url = "https://www.olympedia.org/athletes/" + id;
-                        var response = webClient.DownloadString(url);                        
+                        var response = DownloadString(url, true);
+
+                        if (response == null)
+                            return null;
 
                         if (response.Contains(GetLongEnDateText(deathDate)))
                             return GenerateWebReference($"Olympedia – {articleLabel}", url, "olympedia.org", DateTime.Today, DateTime.MinValue, publisher: "[[OlyMADMen]]");
@@ -165,7 +170,10 @@ namespace WikipediaDeathsPages.Service
             // e.g.    https://www.procyclingstats.com/rider/jacques-anquetil
             var url = "https://www.procyclingstats.com/rider/" + articleLabel.ToLower().Replace(" ", "-");
 
-            var response = webClient.DownloadString(url);
+            var response = DownloadString(url, true);
+
+            if (response == null)
+                return null;
 
             if (response.Contains($"passed away {deathDate.ToString("yyyy-MM-dd")}"))
                 return GenerateWebReference(articleLabel, url, "procyclingstats.com", DateTime.Today, DateTime.MinValue);
@@ -197,20 +205,14 @@ namespace WikipediaDeathsPages.Service
             // e.g.    https://www.worldfootball.net/player_summary/bob-paisley/
             var url = "https://www.worldfootball.net/player_summary/" + articleLabel.ToLower().Replace(" ", "-") + "/";
 
-            try
-            {
-                var response = webClient.DownloadString(url);
+            var response = DownloadString(url, false);  // false: This crappy site returns a 500 (internal server error) in case of a 404...
 
-                if (response.Contains(@$"&dagger; {deathDate.ToString("dd.MM.yyyy")}"))
-                    return GenerateWebReference(articleLabel, url, "worldfootball.net", DateTime.Today, DateTime.MinValue);
-            }
-            catch (Exception e)
-            {
-                // TODO?
-                // This crappy site returns a 301 (and shows a 500) in case of a 404...
-                logger.LogTrace($"{e.Message} article: {articleLabel} Url: {url}", e);
+            if (response == null)
                 return null;
-            }
+
+            if (response.Contains(@$"&dagger; {deathDate.ToString("dd.MM.yyyy")}"))
+                return GenerateWebReference(articleLabel, url, "worldfootball.net", DateTime.Today, DateTime.MinValue);
+
             return null;
         }
 
@@ -223,27 +225,7 @@ namespace WikipediaDeathsPages.Service
             // https://www.hockey-reference.com/search/search.fcgi?search=Brian+Smith           Died: August 2, 1995
             var searchUrl = "https://www." + sportsSiteName + "/search/search.fcgi?search=" + articleLabel.Replace(" ", "+");
 
-            string response;
-
-            try
-            {
-                response = webClient.DownloadString(searchUrl);
-            }
-            // TODO refactor
-            catch (WebException e)
-            {
-                if (((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.InternalServerError)
-                    throw new WebException(
-                        $"ReferenceResolver.GetSportsReference site: {sportsSiteName}: Internal Server Error (500)",
-                        innerException: new Exception("Server Error with Page Requested (500 error)\r\n" +
-                            "We apologize, but there was an error in creating this page.\r\n" +
-                            "- This could be for one of many reasons.\r\n" +
-                            "- Our database is experiencing a very heavy load at this time.\r\n" +
-                            "...\r\n" +
-                            "- The hamsters powering our servers are taking a water break."));
-                else
-                    throw;
-            }
+            string response = DownloadString(searchUrl, true);  
 
             if (response.Contains("Found <strong>0 hits</strong> that match your search"))
                 return null;
@@ -282,7 +264,7 @@ namespace WikipediaDeathsPages.Service
             foreach (Match match in regex.Matches(responseMultiplePlayers))
             {
                 var searchUrl = @"https://www." + sportsSiteName + GetPlayerId(match);
-                var response = webClient.DownloadString(searchUrl);
+                var response = DownloadString(searchUrl, true);
 
                 if (SportsPageContainsDateOfDeath(response, deathDate))
                     return GetSportsWebReference(articleLabel, searchUrl, sportsSiteName);
@@ -309,16 +291,20 @@ namespace WikipediaDeathsPages.Service
 
             if (IndependentUrlFound(referenceItems, ref url))
             {
-                var response = webClient.DownloadString(url);
+                var response = DownloadString(url, true);
+
+                if (response == null)
+                    return null;
+
                 var deathDateSearch = GetLongEnDateText(deathDate);
 
                 if (!response.Contains(deathDateSearch))
-                    return $"Death date '{deathDateSearch}' not found HTML Independent";
+                    return $"Death date '{deathDateSearch}' not found HTML The Independent";
 
                 var data = RetrieveIndependentData(response);
 
                 if (data == null)
-                    return "JSON cannot be scraped from HTML Independent";
+                    return "JSON cannot be scraped from HTML The Independent";
 
                 var pubdate = DateTime.Parse(data.published_date);
 
@@ -385,13 +371,11 @@ namespace WikipediaDeathsPages.Service
             return null;
         }
 
-#pragma warning disable S1135 // Track uses of "TODO" tags
         // TODO create button to check websites to have not been checked already: 
-#pragma warning restore S1135 // Track uses of "TODO" tags
         private bool BritannicaUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // https://www.britannica.com/biography/S-J-Perelman
-            if (ReferenceUrlIdFound("Encyclopædia Britannica Online ID: biography/", @"https://www.britannica.com/biography/", referenceItems, true, ref referenceUrl))
+            if (ReferenceUrlIdFound("Encyclopædia Britannica Online ID: biography/", "https://www.britannica.com/biography/", referenceItems, true, ref referenceUrl))
                 return true;
 
             // http://www.britannica.com/EBchecked/topic/18816/Viktor-Amazaspovich-Ambartsumian
@@ -440,8 +424,16 @@ namespace WikipediaDeathsPages.Service
 
         private bool DecesUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
-            // e.g. https://deces.matchid.io/id/Jwjy9PxtUQEm
-            return ReferenceUrlFound("https://deces.matchid.io/id/", referenceItems, false, ref referenceUrl);
+            // https://deces.matchid.io/id/CV5_zvnsSD0U
+            if (ReferenceUrlIdFound("Fichier des personnes décédées ID (matchID): ", "https://deces.matchid.io/id/", referenceItems, true, ref referenceUrl))
+                return true;
+
+            // http://deces.matchid.io/id/Jwjy9PxtUQEm
+            if (ReferenceUrlFound("http://deces.matchid.io/id/", referenceItems, false, ref referenceUrl))     // http (you never know)
+                return true;
+
+            // https://deces.matchid.io/id/Jwjy9PxtUQEm
+            return ReferenceUrlFound("https://deces.matchid.io/id/", referenceItems, false, ref referenceUrl); // https://
         }
 
         private bool LoCUrlFound(List<string> referenceItems, ref string referenceUrl)
@@ -629,9 +621,11 @@ namespace WikipediaDeathsPages.Service
                     return null;
                 }                    
             }
-            catch (Exception e)
+            catch 
             {
-                Console.WriteLine(e);
+                if (throwException)
+                    throw;
+                
                 return null;
             }
         }

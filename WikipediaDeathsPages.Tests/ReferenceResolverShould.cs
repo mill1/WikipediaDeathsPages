@@ -48,13 +48,13 @@ namespace WikipediaDeathsPages.Tests
         [InlineData(
             "Encyclopædia Britannica Online (2)",
             "Donald Davie",
-            "enwiki~!reference URL: http://www.britannica.com/biography/Donald-Alfred-Davie",
+            "enwiki~!reference URL: http://www.britannica.com/biography/Donald-Alfred-Davie",  // http
             "title=Donald Davie |url=http://www.britannica.com/biography/Donald-Alfred-Davie |website=britannica.com"
         )]
         [InlineData(
             "Encyclopædia Britannica Online (3)",
             "Donald Davie",
-            "enwiki~!reference URL: https://www.britannica.com/biography/Donald-Alfred-Davie",
+            "enwiki~!reference URL: https://www.britannica.com/biography/Donald-Alfred-Davie", // https
             "title=Donald Davie |url=https://www.britannica.com/biography/Donald-Alfred-Davie |website=britannica.com"
         )]
         [InlineData(
@@ -88,7 +88,19 @@ namespace WikipediaDeathsPages.Tests
             "title=Gerry Sundquist - filmportal.de |url=https://www.filmportal.de/person/8ec7d1f8c8774fd8bcac2d74b60413c2 |website=filmportal.de"
         )]
         [InlineData(
-            "Fichier des décès",
+            "Fichier des décès (1)",
+            "Armand Vaquerin",
+            "enwiki~!Fichier des personnes décédées ID (matchID): CV5_zvnsSD0U",
+            "title=matchID - Armand Vaquerin |url=https://deces.matchid.io/id/CV5_zvnsSD0U |website=[[Fichier des personnes décédées|Fichier des décès]]"
+        )]
+        [InlineData(
+            "Fichier des décès (2)",
+            "Philippe Pradayrol",
+            "enwiki~!Fichier des personnes décédées~!retrieved: 2021-07-23T00:00:00Z~!reference URL: http://deces.matchid.io/id/Jwjy9PxtUQEm",
+            "title=matchID - Philippe Pradayrol |url=http://deces.matchid.io/id/Jwjy9PxtUQEm |website=[[Fichier des personnes décédées|Fichier des décès]]"
+        )]
+        [InlineData(
+            "Fichier des décès (3)",
             "Philippe Pradayrol",
             "enwiki~!Fichier des personnes décédées~!retrieved: 2021-07-23T00:00:00Z~!reference URL: https://deces.matchid.io/id/Jwjy9PxtUQEm",
             "title=matchID - Philippe Pradayrol |url=https://deces.matchid.io/id/Jwjy9PxtUQEm |website=[[Fichier des personnes décédées|Fichier des décès]]"
@@ -108,13 +120,13 @@ namespace WikipediaDeathsPages.Tests
         [InlineData(
             "Bibliothèque nationale de France (BnF) (1)",
             "Irving J. Moore",
-            "enwiki~!BnF authorities~!retrieved: 2015-10-10T00:00:00Z~!reference URL: http://data.bnf.fr/ark:/12148/cb14122678c",
+            "enwiki~!BnF authorities~!retrieved: 2015-10-10T00:00:00Z~!reference URL: http://data.bnf.fr/ark:/12148/cb14122678c",  // http
             "title=Irving J. Moore |url=http://data.bnf.fr/ark:/12148/cb14122678c |website=data.bnf.fr |publisher=Bibliothèque nationale de France"
         )]
         [InlineData(
             "Bibliothèque nationale de France (BnF) (2)",
             "Red Prysock",
-            "enwiki~!BnF authorities~!retrieved: 2015-10-10T00:00:00Z~!reference URL: https://data.bnf.fr/ark:/12148/cb13968003b",
+            "enwiki~!BnF authorities~!retrieved: 2015-10-10T00:00:00Z~!reference URL: https://data.bnf.fr/ark:/12148/cb13968003b", // https
             "title=Red Prysock |url=https://data.bnf.fr/ark:/12148/cb13968003b |website=data.bnf.fr |publisher=Bibliothèque nationale de France"
         )]
         [InlineData(
@@ -130,44 +142,21 @@ namespace WikipediaDeathsPages.Tests
             Assert.Contains(expectedSubstring, actualString);
         }
 
-        // Websites IBDB, FemBio, Fichier des décès and SNAC all return status code 200 (+ redirect) instead of HttpStatusCode.NotFound (404) in case of a request to a non-existent url.
+        // Make sure that all requests  non-existent Wikidata-url's result in a null value of the returned reference.
+        // Nb: Websites IBDB, FemBio, Fichier des décès and SNAC all return status code 200 (+ redirect) instead of 404 in case of a request to a non-existent url.
         // F.i. instead of a 404 status code SNAC returns a 200 code: 'Constellation with ark http://n2t.net/ark:/99166/NOTFOUND does not have a published version'.
         // Also, GET requests to site of Bibliothèque nationale de France (BnF) always result in a 303 (redirect) Don't know why.
-        // Ergo: there is no need to check the validity of url's regarding these websites.
-        [Theory(DisplayName = "Handle Wikidata 404 references")]
-        [InlineData(
-            "Encyclopædia Britannica Online (1)",
-            "enwiki~!Encyclopædia Britannica Online~!Encyclopædia Britannica Online ID: biography/NOTFOUND~!subject named as: Utpal Dutt"
-        )]
-        [InlineData(
-            "Encyclopædia Britannica Online (2)",
-            "enwiki~!reference URL: http://www.britannica.com/biography/NOTFOUND"
-        )]
-        [InlineData(
-            "Encyclopædia Britannica Online (3)",
-            "enwiki~!reference URL: https://www.britannica.com/biography/NOTFOUND"
-        )]
-        [InlineData(
-            "The Independent",
-            "enwiki~!reference URL: https://www.independent.co.uk/news/people/obituary-NOTFOUND.html"
-        )]
-        [InlineData(
-            "Spanish Biographical Dictionary (DB~e)",
-            "Spanish Biographical Dictionary~!subject named as: Emilio Botín-Sanz de Sautuola y López~!Spanish Biographical Dictionary ID: NOTFOUND"
-        )]
-        [InlineData(
-            "Biografisch Portaal",
-            "Biografisch Portaal~!Biografisch Portaal van Nederland ID: NOTFOUND~!reference URL: http://www.biografischportaal.nl/persoon/NOTFOUND~!title: Peter Joseph Engels"
-        )]
-        [InlineData(
-            "Filmportal",
-            "enwiki~!filmportal.de~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Gerry Sundquist~!Filmportal ID: NOTFOUND"
-        )]
-        [InlineData(
-            "Library of Congress (LoC)",
-            "enwiki~!Library of Congress authority ID: NOTFOUND~!Library of Congress Authorities~!retrieved: 2019-12-16T00:00:00Z"
-        )]
-        public void WikidataPrimaryReferenceNotFound(string source, string dateOfDeathRefs)
+        // Ergo: there is no need to check the validity of url's regarding these websites since we don't inspect them for death date anyway in case of a 200 response.
+        [Theory(DisplayName = "Return null in case of non-existent url (in Wikidata)")]
+        [InlineData("Encyclopædia Britannica (1)", "enwiki~!Encyclopædia Britannica Online~!Encyclopædia Britannica Online ID: biography/NOTFOUND")]
+        [InlineData("Encyclopædia Britannica (2)", "enwiki~!reference URL: http://www.britannica.com/biography/NOTFOUND")]
+        [InlineData("Encyclopædia Britannica (3)","enwiki~!reference URL: https://www.britannica.com/biography/NOTFOUND")]
+        [InlineData("The Independent","enwiki~!reference URL: https://www.independent.co.uk/news/people/obituary-NOTFOUND.html")]
+        [InlineData("Spanish Biographical Dictionary (DB~e)", "Spanish Biographical Dictionary~!subject named as: Not Found~!Spanish Biographical Dictionary ID: NOTFOUND")]
+        [InlineData("Biografisch Portaal", "Biografisch Portaal~!Biografisch Portaal van Nederland ID: NOTFOUND~!reference URL: http://www.biografischportaal.nl/persoon/NOTFOUND~!title: Not Found")]
+        [InlineData("Filmportal", "enwiki~!filmportal.de~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Not Found~!Filmportal ID: NOTFOUND")]
+        [InlineData("Library of Congress (LoC)", "enwiki~!Library of Congress authority ID: NOTFOUND~!Library of Congress Authorities~!retrieved: 2019-12-16T00:00:00Z")]
+        public void ReturnNullIfWikidataUrlNotFound(string source, string dateOfDeathRefs)
         {
             Debug.WriteLine($"##### Testing source {source}...");
             var actualString = referenceResolver.Resolve(DateTime.MinValue, dateOfDeathRefs, "John Doe", null);
@@ -272,8 +261,23 @@ namespace WikipediaDeathsPages.Tests
             Assert.Contains(expectedSubstring, actualString);
         }
 
-
-
-
+        // Make sure that all requests to non-existent (sport) website url's result in a null value of the returned reference.
+        // Even if the website returns status 200 (Ok) in case of a non-existent url we're good since (unlike most Wikdata ref sources) 
+        // we check the response of (sport) websites for the date of death which will result in a null reference since it will not be found.
+        [Theory (DisplayName = "Return null in case of non-existent url (to sports website)")]
+        [InlineData("Baseball", "Baseball-Reference.com")]
+        [InlineData("American football", "Pro-Football-Reference.com")]
+        [InlineData("Basketball", "Basketball-Reference.com")]
+        [InlineData("Hockey", "Hockey-Reference.com")]
+        [InlineData("Olympics", "olympedia.com")]
+        [InlineData("Association football", "worldfootball.net")]
+        [InlineData("Cyclist", "procyclingstats.com")]
+        [InlineData("Golfer", "where2golf.com")]
+        public void ReturnNullIfWebsiteUrlNotFound(string knownFor, string websiteName)
+        {
+            Debug.WriteLine($"##### Testing website {websiteName}...");
+            var actualString = referenceResolver.Resolve(DateTime.MinValue, null, "Noty Foundy", knownFor);
+            Assert.Null(actualString);
+        }
     }
 }

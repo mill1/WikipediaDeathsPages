@@ -174,27 +174,11 @@ namespace WikipediaDeathsPages.Tests
             Assert.Null(actualString);
         }
 
-        // TODO (sports sites)
-        // Check multiple occurrences name
-
-        [Fact(DisplayName = "Resolve Baseball reference")]
-        public void ResolveBaseballReference()
-        {
-            const string name = "Tsunemi Tsuda";
-            var deathDate = new DateTime(1993, 7, 20);            
-
-            var expectedSubstring = "title=Tsunemi Tsuda Stats - Baseball-Reference.com |url=https://www.baseball-reference.com/search/search.fcgi?search=Tsunemi+Tsuda |website=baseball-reference.com";
-            var actualString = referenceResolver.Resolve(deathDate, null, name, "Baseball");
-
-            Assert.Contains(expectedSubstring, actualString);
-        }
-
-
         [Fact(DisplayName = "Resolve Olympic reference")]
         public void ResolveOlympicReference()
         {
             const string name = "Fanny Blankers-Koen";
-            var deathDate = new DateTime(2004, 1, 25);      
+            var deathDate = new DateTime(2004, 1, 25);
             wikipediaReferencesMock.Setup(_ => _.GetIdsOfName(name)).Returns(new List<int> { 73711 });
 
             var expectedSubstring = $"title=Olympedia – {name} |url=https://www.olympedia.org/athletes/73711 |website=olympedia.org";
@@ -202,6 +186,94 @@ namespace WikipediaDeathsPages.Tests
 
             Assert.Contains(expectedSubstring, actualString);
         }
+
+        [Theory(DisplayName = "Resolve website references")]
+        [InlineData(
+            "Baseball",
+            "Baseball-Reference.com (single occurrence of name)",
+            "Tsunemi Tsuda",
+            "1993-7-20",
+            "title=Tsunemi Tsuda Stats - Baseball-Reference.com |url=https://www.baseball-reference.com/search/search.fcgi?search=Tsunemi+Tsuda |website=baseball-reference.com"
+        )]
+        [InlineData(
+            "Baseball",
+            "Baseball-Reference.com (multiple occurrences)",
+            "George Smith",
+            "1987-6-15",
+            "title=George Smith Stats - Baseball-Reference.com |url=https://www.baseball-reference.com/players/s/smithge04.shtml |website=baseball-reference.com"
+        )]
+        [InlineData(
+            "American football",
+            "Pro-Football-Reference.com (single occurrence of name)",
+            "Abe Shires",
+            "1993-7-23",
+            "title=Abe Shires Stats - Pro-Football-Reference.com |url=https://www.pro-football-reference.com/search/search.fcgi?search=Abe+Shires |website=pro-football-reference.com"
+        )]
+        [InlineData(
+            "American football",
+            "Pro-Football-Reference.com (multiple occurrences)",
+            "George Smith",
+            "1986-3-5",
+            "title=George Smith Stats - Pro-Football-Reference.com |url=https://www.pro-football-reference.com/players/S/SmitGe22.htm |website=pro-football-reference.com"
+        )]
+        [InlineData(
+            "Basketball",
+            "Basketball-Reference.com (single occurrence of name)",
+            "Reggie Lewis",
+            "1993-7-27",
+            "title=Reggie Lewis Stats - Basketball-Reference.com |url=https://www.basketball-reference.com/search/search.fcgi?search=Reggie+Lewis |website=basketball-reference.com"
+        )]
+        [InlineData(
+            "Basketball",
+            "Basketball-Reference.com (multiple occurrences)",
+            "Eddie Johnson",
+            "2020-10-26",
+            "title=Eddie Johnson Stats - Basketball-Reference.com |url=https://www.basketball-reference.com/players/j/johnsed02.html |website=basketball-reference.com"
+        )]
+        [InlineData(
+            "Hockey",
+            "Hockey-Reference.com (single occurrence of name)",
+            "Archie Wilcox",
+            "1993-8-27",
+            "title=Archie Wilcox Stats - Hockey-Reference.com |url=https://www.hockey-reference.com/search/search.fcgi?search=Archie+Wilcox |website=hockey-reference.com"
+        )]
+        [InlineData(
+            "Hockey",
+            "Hockey-Reference.com (multiple occurrences)",
+            "Brian Smith ",
+            "1995-8-2",
+            "title=Brian Smith  Stats - Hockey-Reference.com |url=https://www.hockey-reference.com/players/s/smithbr02.html |website=hockey-reference.com"
+        )]
+        [InlineData(
+            "Association football",
+            "worldfootball.net",
+            "Tony Barton",
+            "1993-8-20",
+            "title=Tony Barton |url=https://www.worldfootball.net/player_summary/tony-barton/ |website=worldfootball.net"
+        )]
+        [InlineData(
+            "Cyclist",
+            "procyclingstats.com",
+            "Alfred Haemerlinck",
+            "1993-7-10",
+            "title=Alfred Haemerlinck |url=https://www.procyclingstats.com/rider/alfred-haemerlinck |website=procyclingstats.com"
+        )]
+        [InlineData(
+            "Golfer",
+            "where2golf.com",
+            "Payne Stewart",
+            "1999-10-25",
+            "title=Payne Stewart |url=https://www.where2golf.com/whos-who/payne-stewart |website=where2golf.com"
+        )]
+        public void ResolveWebsiteReferences(string knownFor, string websiteName, string articleLabel, string deathDateString, string expectedSubstring)
+        {
+            Debug.WriteLine($"##### Testing website {websiteName}...");
+            var actualString = referenceResolver.Resolve(DateTime.Parse(deathDateString), null, articleLabel, knownFor);
+            Assert.Contains(expectedSubstring, actualString);
+        }
+
+
+
 
     }
 }

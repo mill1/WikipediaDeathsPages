@@ -405,7 +405,6 @@ namespace WikipediaDeathsPages.Service
         private bool IndependentUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html
-            // TODO true?
             return ReferenceUrlFound("https://www.independent.co.uk/news/people/", referenceItems, true, ref referenceUrl);
         }
 

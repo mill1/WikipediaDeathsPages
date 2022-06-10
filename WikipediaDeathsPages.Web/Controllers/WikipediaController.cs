@@ -56,12 +56,12 @@ namespace WikipediaDeathsPages.Controllers
             return wikipediaService.GetArticleMetrics(article);
         }
 
-        [HttpGet("scores")]
+        [HttpGet("list/scores")]
         public IEnumerable<ArticleMetrics> GetNotabilityScores()
         {
             /*
                 Resolve notability of persons with death date 1 January of year to process.
-                https://localhost:44304/wikipedia/scores
+                https://localhost:44304/wikipedia/list/scores
                 Multiply metrics: https://www.howtogeek.com/775651/how-to-convert-a-json-file-to-microsoft-excel/ 
             */
 

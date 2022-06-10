@@ -9,6 +9,6 @@ namespace WikipediaDeathsPages.Service.Interfaces
         string Resolve(DateTime deathDate, string dateOfDeathreferences, string articleLabel, string knownFor);
         string Resolve(string existingReference, DateTime deathDate, string dateOfDeathReferences, string articleLabel, string knownFor);
         List<string> GetReferenceItems(string dateOfDeathreferences);
-        string ResolveByKnownFor(ExistingEntryDto existingEntry, string dateOfDeathReferences, string wikiText, string articleLabel, DateTime deathDate);
+        string Resolve(ExistingEntryDto existingEntry, string dateOfDeathReferences, string wikiText, string articleLabel, DateTime deathDate);
     }
 }

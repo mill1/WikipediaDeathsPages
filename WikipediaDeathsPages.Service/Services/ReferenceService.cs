@@ -85,8 +85,8 @@ namespace WikipediaDeathsPages.Service
             return existingReference;
         }
 
-        // Bit iffy; needed to determine refs regarding first day of year
-        public string ResolveByKnownFor(ExistingEntryDto existingEntry, string dateOfDeathReferences, string wikiText, string articleLinkedName, DateTime deathDate)
+        // Bit iffy as well; needed to determine refs regarding first day of year. We also need to resolve knownFor before trying to resolve the reference.
+        public string Resolve(ExistingEntryDto existingEntry, string dateOfDeathReferences, string wikiText, string articleLinkedName, DateTime deathDate)
         {
             if (wikiText == null)
                 wikiText = wikipediaWebClient.GetWikiTextArticle(articleLinkedName, out _);
@@ -95,6 +95,7 @@ namespace WikipediaDeathsPages.Service
                 existingEntry = CreateExistingEntryDto(wikiText, deathDate, articleLinkedName);
 
             string knownFor = wikiTextService.ResolveKnownFor(wikiText, existingEntry.Information);
+
             return Resolve(existingEntry.Reference, deathDate, dateOfDeathReferences, GetArticleLabel(articleLinkedName), knownFor);
         }
 

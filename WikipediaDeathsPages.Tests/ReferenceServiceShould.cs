@@ -294,7 +294,5 @@ namespace WikipediaDeathsPages.Tests
             var actualString = referenceService.Resolve(DateTime.MinValue, null, "Noty Foundy", knownFor);
             Assert.Null(actualString);
         }
-
-        // TODO test Exception in .Resolve
     }
 }

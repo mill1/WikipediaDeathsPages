@@ -216,7 +216,7 @@ namespace WikipediaDeathsPages.Service
 
             if (resolveReference)
             {
-                existingEntry.Reference = referenceService.ResolveByKnownFor(existingEntry, dateOfDeathReferences, wikiText, existingEntry.ArticleLinkedName, deathDate);
+                existingEntry.Reference = referenceService.Resolve(existingEntry, dateOfDeathReferences, wikiText, existingEntry.ArticleLinkedName, deathDate);
             }
 
             existingEntry.NotabilityScore = notabilityScore;

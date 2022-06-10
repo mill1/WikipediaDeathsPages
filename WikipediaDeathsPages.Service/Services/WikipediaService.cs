@@ -16,16 +16,16 @@ namespace WikipediaDeathsPages.Service
     public class WikipediaService : IWikipediaService
     {
         private readonly IWikidataService wikidataService;
-        private readonly IReferenceResolver referenceResolver;
+        private readonly IReferenceService referenceService;
         private readonly IWikiTextService wikiTextService;
         private readonly IToolforgeService toolforgeService;
         private readonly IWikipediaWebClient wikipediaWebClient;
         private readonly ILogger<WikipediaService> logger;
 
-        public WikipediaService(IWikidataService wikidataService, IReferenceResolver referenceResolver, IWikiTextService wikiTextService, IToolforgeService toolforgeService, IWikipediaWebClient wikipediaWebClient, ILogger<WikipediaService> logger)
+        public WikipediaService(IWikidataService wikidataService, IReferenceService referenceService, IWikiTextService wikiTextService, IToolforgeService toolforgeService, IWikipediaWebClient wikipediaWebClient, ILogger<WikipediaService> logger)
         {
             this.wikidataService = wikidataService;
-            this.referenceResolver = referenceResolver;
+            this.referenceService = referenceService;
             this.wikiTextService = wikiTextService;
             this.toolforgeService = toolforgeService;
             this.wikipediaWebClient = wikipediaWebClient;
@@ -251,12 +251,12 @@ namespace WikipediaDeathsPages.Service
         {
             // Bit iffy: see condition EnrichFoundExistingEntry(..
             if (existingReference == null)
-                return referenceResolver.Resolve(deathDate, dateOfDeathReferences, articleLabel, knownFor);
+                return referenceService.Resolve(deathDate, dateOfDeathReferences, articleLabel, knownFor);
             else
             {
                 if (existingReference.Contains("sports-reference.com", StringComparison.OrdinalIgnoreCase)) // also: publisher = Sports-Reference.com. BTW: encountered sports-reference in Wikidata
                 {
-                    var olympediaRef = referenceResolver.Resolve(deathDate, dateOfDeathReferences, articleLabel, "Olympics");
+                    var olympediaRef = referenceService.Resolve(deathDate, dateOfDeathReferences, articleLabel, "Olympics");
 
                     if (olympediaRef != null)
                         return olympediaRef;

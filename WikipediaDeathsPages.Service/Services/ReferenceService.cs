@@ -13,15 +13,10 @@ using WikipediaDeathsPages.Service.Interfaces;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
 using WikipediaDeathsPages.Service.Models;
-using System.Net.Http;
 
 /*
 Loop eerst door de 'referenties'
 'Volgorde': zie volgorde in methode Resolve()
-
-(Oxford DNB: subscription needed: geen DoD op gratis excerpt https://www.oxforddnb.com/view/10.1093/ref:odnb/9780198614128.001.0001/odnb-9780198614128-e-63193)
-(Dictionary of Irish Biography: too complicated/error prone for new: https://www.dib.ie/biography/mitchel-charles-gerald-a5832)
-
 Indien geen match: check entry.KnownFor
 Eén waarde mbt KnowFor: volgorde wordt dus bepaald in WikipediaService.ResolveKnownFor():
 
@@ -30,17 +25,15 @@ Tot slot NYT tool er overheen halen.
 
 namespace WikipediaDeathsPages.Service
 {
-    public class ReferenceResolver : IReferenceResolver
+    public class ReferenceService : IReferenceService
     {
         private readonly IWikipediaReferences wikipediaReferences;
-        private readonly ILogger<ReferenceResolver> logger;
         private readonly WebClient webClient;
         private readonly CultureInfo cultureInfo;
 
-        public ReferenceResolver(IWikipediaReferences wikipediaReferences, ILogger<ReferenceResolver> logger)
+        public ReferenceService(IWikipediaReferences wikipediaReferences)
         {
             this.wikipediaReferences = wikipediaReferences;
-            this.logger = logger;
             cultureInfo = new CultureInfo("en-US");
 
             webClient = new WebClient();

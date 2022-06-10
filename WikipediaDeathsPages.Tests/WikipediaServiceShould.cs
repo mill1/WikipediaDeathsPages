@@ -45,7 +45,7 @@ namespace WikipediaDeathsPagesTests
 
             referenceResolverMock.Setup(_ => _.Resolve(deathDate, sanitizedDateOfDeathReferences, itemDto.Label, null)).Returns("");
 
-            wikidataServiceMock.Setup(_ => _.GetItemsPerDeathDate(deathDate)).Returns(new List<WikidataItemDto> { itemDto });
+            wikidataServiceMock.Setup(_ => _.GetItemsPerDeathDate(deathDate, false)).Returns(new List<WikidataItemDto> { itemDto });
             wikidataServiceMock.Setup(_ => _.ResolveDateOfBirth(itemDto)).Returns((DateTime)itemDto.DateOfBirth);
             wikidataServiceMock.Setup(_ => _.ResolveBiolink(itemDto)).Returns($"[[{itemDto.ArticleName}]]");
             wikidataServiceMock.Setup(_ => _.ResolveItemDescription(itemDto)).Returns(itemDto.Description);

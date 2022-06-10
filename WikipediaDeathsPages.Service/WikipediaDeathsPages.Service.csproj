@@ -5,9 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.43" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Wikimedia.Utilities" Version="1.0.8" />
+    <PackageReference Include="Wikimedia.Utilities" Version="1.0.9" />
   </ItemGroup>
 
   <ItemGroup>

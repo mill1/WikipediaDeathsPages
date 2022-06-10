@@ -13,6 +13,8 @@ using WikipediaDeathsPages.Service.Interfaces;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
 using WikipediaDeathsPages.Service.Models;
+using WikipediaDeathsPages.Service.Dtos;
+using Wikimedia.Utilities.Interfaces;
 
 /*
 Loop eerst door de 'referenties'
@@ -27,13 +29,17 @@ namespace WikipediaDeathsPages.Service
 {
     public class ReferenceService : IReferenceService
     {
-        private readonly IWikipediaReferences wikipediaReferences;
+        private readonly IWikipediaReferences dataWikipediaReferences;
+        private readonly IWikipediaWebClient wikipediaWebClient;
+        private readonly IWikiTextService wikiTextService;
         private readonly WebClient webClient;
         private readonly CultureInfo cultureInfo;
 
-        public ReferenceService(IWikipediaReferences wikipediaReferences)
+        public ReferenceService(IWikipediaReferences wikipediaReferences, IWikipediaWebClient wikipediaWebClient, IWikiTextService wikiTextService)
         {
-            this.wikipediaReferences = wikipediaReferences;
+            this.dataWikipediaReferences = wikipediaReferences;
+            this.wikipediaWebClient = wikipediaWebClient;
+            this.wikiTextService = wikiTextService;
             cultureInfo = new CultureInfo("en-US");
 
             webClient = new WebClient();
@@ -59,6 +65,57 @@ namespace WikipediaDeathsPages.Service
 
             // 3. Try get references from secondary sources stated in Wikidata
             return GetReferenceFromWikidatRefItemsSecond(articleLabel, referenceItems);
+        }
+
+        public string Resolve(string existingReference, DateTime deathDate, string dateOfDeathReferences, string articleLabel, string knownFor)
+        {
+            // Bit iffy: see condition EnrichFoundExistingEntry(..
+            if (existingReference == null)
+                return Resolve(deathDate, dateOfDeathReferences, articleLabel, knownFor);
+            else
+            {
+                if (existingReference.Contains("sports-reference.com", StringComparison.OrdinalIgnoreCase)) // also: publisher = Sports-Reference.com. BTW: encountered sports-reference in Wikidata
+                {
+                    var olympediaRef = Resolve(deathDate, dateOfDeathReferences, articleLabel, "Olympics");
+
+                    if (olympediaRef != null)
+                        return olympediaRef;
+                }
+            }
+            return existingReference;
+        }
+
+        // Bit iffy; needed to determine refs regarding first day of year
+        public string ResolveByKnownFor(ExistingEntryDto existingEntry, string dateOfDeathReferences, string wikiText, string articleLinkedName, DateTime deathDate)
+        {
+            if (wikiText == null)
+                wikiText = wikipediaWebClient.GetWikiTextArticle(articleLinkedName, out _);
+
+            if (existingEntry == null)
+                existingEntry = CreateExistingEntryDto(wikiText, deathDate, articleLinkedName);
+
+            string knownFor = wikiTextService.ResolveKnownFor(wikiText, existingEntry.Information);
+            return Resolve(existingEntry.Reference, deathDate, dateOfDeathReferences, GetArticleLabel(articleLinkedName), knownFor);
+        }
+
+        private ExistingEntryDto CreateExistingEntryDto(string wikiText, DateTime deathDate, string articleLinkedName)
+        {
+            return new ExistingEntryDto()
+            {
+                ArticleLinkedName = articleLinkedName,
+                DateOfDeath = deathDate,
+                Information = wikiTextService.ResolveDescription(wikiText),
+                Reference = null
+            };
+        }
+
+        private string GetArticleLabel(string articleName)
+        {
+            // Do not depend on what other wikipedians put in the label part of a wikilink: [[name part|label part]]; linked name is more reliable.
+            if (articleName.Contains("("))
+                return articleName.Substring(0, articleName.IndexOf("(")).Trim();
+            else
+                return articleName;
         }
 
         private string GetReferenceFromWebsites(string articleLabel, string knownFor, DateTime deathDate)
@@ -113,7 +170,7 @@ namespace WikipediaDeathsPages.Service
 
             foreach (var name in names)
             {
-                var OlympediaIds = wikipediaReferences.GetIdsOfName(name);
+                var OlympediaIds = dataWikipediaReferences.GetIdsOfName(name);
 
                 if (OlympediaIds != null)
                 {
@@ -382,7 +439,11 @@ namespace WikipediaDeathsPages.Service
         private bool IndependentUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html
-            return ReferenceUrlFound("https://www.independent.co.uk/news/people/", referenceItems, true, ref referenceUrl);
+            if (ReferenceUrlFound("https://www.independent.co.uk/news/people/", referenceItems, true, ref referenceUrl))
+                return true;
+
+            // e.g. https://www.independent.co.uk/incoming/obituary-harold-shepherdson-5649167.html
+            return ReferenceUrlFound("https://www.independent.co.uk/incoming/", referenceItems, true, ref referenceUrl);
         }
 
         private bool BiografischPortaalUrlFound(List<string> referenceItems, ref string referenceUrl)

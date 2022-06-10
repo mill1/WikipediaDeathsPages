@@ -22,7 +22,8 @@ namespace WikipediaDeathsPages.Service
         private readonly IWikipediaWebClient wikipediaWebClient;
         private readonly ILogger<WikipediaService> logger;
 
-        public WikipediaService(IWikidataService wikidataService, IReferenceService referenceService, IWikiTextService wikiTextService, IToolforgeService toolforgeService, IWikipediaWebClient wikipediaWebClient, ILogger<WikipediaService> logger)
+        public WikipediaService(IWikidataService wikidataService, IReferenceService referenceService, IWikiTextService wikiTextService, 
+                                IToolforgeService toolforgeService, IWikipediaWebClient wikipediaWebClient, ILogger<WikipediaService> logger)
         {
             this.wikidataService = wikidataService;
             this.referenceService = referenceService;
@@ -143,7 +144,7 @@ namespace WikipediaDeathsPages.Service
                 {
                     age = wikidataService.ResolveAge(entry.WikidataItem);
                     description = DetermineDescription(entry);
-                    reference = ResolveReference(null, deathDate, entry.WikidataItem.DateOfDeathRefs, entry.WikidataItem.Label, entry.KnownFor);
+                    reference = referenceService.Resolve(null, deathDate, entry.WikidataItem.DateOfDeathRefs, entry.WikidataItem.Label, entry.KnownFor);
                 }
 
                 entry.ReferenceUrl = wikiTextService.GetReferenceUrlFromReferenceText(reference);
@@ -215,63 +216,12 @@ namespace WikipediaDeathsPages.Service
 
             if (resolveReference)
             {
-                existingEntry.Reference = ResolveReferenceByKnownFor(existingEntry, dateOfDeathReferences, wikiText, existingEntry.ArticleLinkedName, deathDate);
+                existingEntry.Reference = referenceService.ResolveByKnownFor(existingEntry, dateOfDeathReferences, wikiText, existingEntry.ArticleLinkedName, deathDate);
             }
 
             existingEntry.NotabilityScore = notabilityScore;
             existingEntry.Keep = KeepExistingEntry(existingEntry, out string reason);
             existingEntry.ReasonKeepReject = reason;
-        }
-
-        // Bit iffy; needed to determine refs regarding first day of year
-        public string ResolveReferenceByKnownFor(ExistingEntryDto existingEntry, string dateOfDeathReferences, string wikiText, string articleLinkedName, DateTime deathDate)
-        {
-            if (wikiText == null)
-                wikiText = wikipediaWebClient.GetWikiTextArticle(articleLinkedName, out _);
-
-            if (existingEntry == null)
-                existingEntry = CreateExistingEntryDto(wikiText, deathDate, articleLinkedName);
-
-            string knownFor = wikiTextService.ResolveKnownFor(wikiText, existingEntry.Information);
-            return ResolveReference(existingEntry.Reference, deathDate, dateOfDeathReferences, GetArticleLabel(articleLinkedName), knownFor);
-        }
-
-        private ExistingEntryDto CreateExistingEntryDto(string wikiText, DateTime deathDate, string articleLinkedName)
-        {
-            return new ExistingEntryDto()
-            {                
-                ArticleLinkedName = articleLinkedName,
-                DateOfDeath = deathDate,
-                Information = wikiTextService.ResolveDescription(wikiText),
-                Reference = null
-            };
-        }
-
-        private string ResolveReference(string existingReference, DateTime deathDate, string dateOfDeathReferences, string articleLabel, string knownFor)
-        {
-            // Bit iffy: see condition EnrichFoundExistingEntry(..
-            if (existingReference == null)
-                return referenceService.Resolve(deathDate, dateOfDeathReferences, articleLabel, knownFor);
-            else
-            {
-                if (existingReference.Contains("sports-reference.com", StringComparison.OrdinalIgnoreCase)) // also: publisher = Sports-Reference.com. BTW: encountered sports-reference in Wikidata
-                {
-                    var olympediaRef = referenceService.Resolve(deathDate, dateOfDeathReferences, articleLabel, "Olympics");
-
-                    if (olympediaRef != null)
-                        return olympediaRef;
-                }
-            }
-            return existingReference;
-        }
-
-        private string GetArticleLabel(string articleName)
-        {
-            // Do not depend on what other wikipedians put in the label part of a wikilink: [[name part|label part]]; linked name is more reliable.
-            if (articleName.Contains("("))
-                return articleName.Substring(0, articleName.IndexOf("(")).Trim();
-            else
-                return articleName;
         }
 
         private void HandleNotFoundArticleName(DateTime deathDate, ExistingEntryDto existingEntry, string wikiText)

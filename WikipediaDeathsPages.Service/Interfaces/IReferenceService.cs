@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WikipediaDeathsPages.Service.Dtos;
 
 namespace WikipediaDeathsPages.Service.Interfaces
 {
     public interface IReferenceService
     {
-        string Resolve(System.DateTime deathDate, string dateOfDeathreferences, string articleLabel, string knownFor);
+        string Resolve(DateTime deathDate, string dateOfDeathreferences, string articleLabel, string knownFor);
+        string Resolve(string existingReference, DateTime deathDate, string dateOfDeathReferences, string articleLabel, string knownFor);
         List<string> GetReferenceItems(string dateOfDeathreferences);
+        string ResolveByKnownFor(ExistingEntryDto existingEntry, string dateOfDeathReferences, string wikiText, string articleLabel, DateTime deathDate);
     }
 }

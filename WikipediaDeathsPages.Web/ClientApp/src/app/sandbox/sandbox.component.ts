@@ -13,6 +13,7 @@ export class SandboxComponent {
   isBusy = false;
   scoreNumberFour: number = -1;
   entries: DeathEntryDto[];
+  validSite: boolean;
 
   constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {  
   }
@@ -21,7 +22,7 @@ export class SandboxComponent {
     this.currentCount++;
   }
 
-  onFetch(){    
+  onFetchOrig(){    
     this.isBusy = true;    
 
     this.http.get<DeathDateResultDto>(this.baseUrl + 'wikipedia/1984-1-17/48').subscribe(result => {   
@@ -35,4 +36,32 @@ export class SandboxComponent {
       console.error(error);}
       );
   }
+
+  onFetchTest(){    
+    this.isBusy = true;    
+    this.http.get<boolean>(this.baseUrl + 'reference/check/https:%2F%2Fwww.nu.nl/John Doe').subscribe(result => {         
+    this.validSite = result;      
+    this.isBusy = false;          
+    }, error => {
+      this.isBusy = false;
+      console.error(error);}
+      );
+  }
+
+  onFetch(){    
+    this.isBusy = true;    
+    let url = 'https://www.britannica.com/biography/Utpal-Dutt';
+
+    console.log('encoded: ' + encodeURIComponent(url));
+
+    this.http.get<boolean>(this.baseUrl + 'reference/check/' + encodeURIComponent(url) + '/Utpal Dutt').subscribe(result => {         
+    this.validSite = result;      
+    this.isBusy = false;          
+    }, error => {
+      this.isBusy = false;
+      console.error(error);}
+      );
+  }
+
+
 }

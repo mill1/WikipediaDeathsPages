@@ -69,6 +69,7 @@ namespace WikipediaDeathsPages
             }
 
             app.UseHttpsRedirection();
+
             app.UseStaticFiles();
             if (!env.IsDevelopment())
             {

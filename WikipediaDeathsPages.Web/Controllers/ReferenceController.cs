@@ -30,6 +30,13 @@ namespace WikipediaDeathsPages.Controllers
             return referenceService.Resolve(null, null, null, article, deathDate);
         }
 
+        [HttpGet("check/{url}/{searchPhrases}")]
+        public bool CheckWebsite(string url, string searchPhrases)
+        {
+            // https://localhost:44304/reference/check/https:%2F%2Fwww.nu.nl/John%20Doe
+            return referenceService.CheckWebsite(url, searchPhrases);
+        }
+
         [HttpGet("list/{deathDate}")]
         public IEnumerable<string> GetReferences(DateTime deathDate)
         {

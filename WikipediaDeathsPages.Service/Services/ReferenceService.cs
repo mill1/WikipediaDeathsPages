@@ -99,6 +99,19 @@ namespace WikipediaDeathsPages.Service
             return Resolve(existingEntry.Reference, deathDate, dateOfDeathReferences, GetArticleLabel(articleLinkedName), knownFor);
         }
 
+        // TODO string array
+        public bool CheckWebsite(string encodedUrl, string searchPhrases)
+        {
+            string url = System.Web.HttpUtility.UrlDecode(encodedUrl);
+
+            var response = DownloadString(url, false);
+
+            if (response == null)
+                return false;
+
+            return response.Contains(searchPhrases);
+        }
+
         private ExistingEntryDto CreateExistingEntryDto(string wikiText, DateTime deathDate, string articleLinkedName)
         {
             return new ExistingEntryDto()

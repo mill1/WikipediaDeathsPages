@@ -56,12 +56,12 @@ namespace WikipediaDeathsPages.Controllers
             return wikipediaService.GetArticleMetrics(article);
         }
 
-        [HttpGet("scores")]
+        [HttpGet("list/scores")]
         public IEnumerable<ArticleMetrics> GetNotabilityScores()
         {
             /*
                 Resolve notability of persons with death date 1 January of year to process.
-                https://localhost:44304/wikipedia/scores
+                https://localhost:44304/wikipedia/list/scores
                 Multiply metrics: https://www.howtogeek.com/775651/how-to-convert-a-json-file-to-microsoft-excel/ 
             */
 
@@ -89,74 +89,6 @@ namespace WikipediaDeathsPages.Controllers
             };
 
             return wikipediaService.GetArticleMetrics(articles);
-        }
-
-        [HttpGet("reference/{article}/{deathDate}")]
-        public string GetReferenceByKnownFor(string article, DateTime deathDate)
-        {
-            // https://localhost:44304/wikipedia/reference/Bob%20Paisley/1996-2-14
-            // https://localhost:44304/wikipedia/reference/John%20Kramer%20(footballer)/1994-7-13
-            return wikipediaService.ResolveReferenceByKnownFor(null, null, null, article, deathDate);
-        }
-
-        [HttpGet("references/{deathDate}")]
-        public IEnumerable<string> GetReferencesByKnownFor(DateTime deathDate)
-        {
-            var references = new List<string>();
-
-            /*
-            Check for references regarding the existing entries and our new entries regarding January 1. 
-            // 13-7-1994 (4 results!):
-            // https://localhost:44304/wikipedia/references/1994-7-13
-            var articles = new List<string>
-            {
-                "Eddie Boyd",
-                "Anita Bärwirth",
-                "Gerry Couture",
-                "John Kramer (footballer)", 
-                "Juozas Miltinis",
-                "Jimmie Reese",
-                "Murray Tyrrell",
-                "Marik Vos-Lundh",
-                "Olin Chaddock Wilson"
-            };   
-            */
-
-            // 1-1-1997:
-            // https://localhost:44304/wikipedia/references/1997-1-1
-            var articles = new List<string>
-            {
-                // notable API entries:
-                "Prince Eugen of Bavaria",
-                "Al Eugster",
-                "Jean Feller",
-                "Franco Volpi (actor)",
-                "Ladislau Zilahi",
-                // Existing entries:
-                 "Aenne Brauksiepe",
-                "Asnoldo Devonish",
-                "Ivan Graziani",
-                "Hagood Hardy",
-                "Mohammed Hafez Ismail",
-                "Graham Kersey",
-                "Hans-Martin Majewski",
-                "James B. Pritchard",
-                "Joan Rice",
-                "Townes Van Zandt"
-            };
-            /*
-             *Two results:
-                "Jean Feller: <ref>{{cite web |last1= |first1= |title=Olympedia – Jean Feller |url=http://www.olympedia.org/athletes/26369 |website=olympedia.org |publisher=[[OlyMADMen]] |access-date=12 March 2022 |language= |date=}}</ref>",
-                "Asnoldo Devonish: <ref>{{cite web |last1= |first1= |title=Olympedia – Asnoldo Devonish |url=http://www.olympedia.org/athletes/79265 |website=olympedia.org |publisher=[[OlyMADMen]] |access-date=12 March 2022 |language= |date=}}</ref>",
-             */
-
-            foreach (var article in articles)
-            {
-                var reference = wikipediaService.ResolveReferenceByKnownFor(null, null, null, article, deathDate);
-                references.Add($"{article}: {reference}");
-            }
-
-            return references;
         }
     }
 }

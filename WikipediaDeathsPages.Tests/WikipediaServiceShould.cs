@@ -13,6 +13,7 @@ using WikipediaDeathsPages.Service;
 using Wikimedia.Utilities.ExtensionMethods;
 using WikipediaDeathsPages.Service.Interfaces;
 using Xunit;
+using WikipediaDeathsPages.Data.Interfaces;
 
 namespace WikipediaDeathsPagesTests
 {
@@ -21,7 +22,7 @@ namespace WikipediaDeathsPagesTests
         private readonly ILogger<WikipediaService> logger;
         private readonly Mock<IWikidataService> wikidataServiceMock;
         private readonly Mock<IWikipediaWebClient> webClientMock;
-        private readonly Mock<IReferenceResolver> referenceResolverMock;
+        private readonly Mock<IReferenceService> referenceServiceMock;
         private readonly Mock<IToolforgeService> toolforgeServiceMock;
 
         public WikipediaServiceShould()
@@ -29,7 +30,7 @@ namespace WikipediaDeathsPagesTests
             logger = new NullLogger<WikipediaService>();
             wikidataServiceMock = new Mock<IWikidataService>();
             webClientMock = new Mock<IWikipediaWebClient>();
-            referenceResolverMock = new Mock<IReferenceResolver>();
+            referenceServiceMock = new Mock<IReferenceService>();
             var articleName = CreateWikidataItemDto(description: null).ArticleName;
             toolforgeServiceMock = new Mock<IToolforgeService>();
             toolforgeServiceMock.Setup(_ => _.GetWikilinksInfo(articleName)).Returns(new Wikilinks { all = 600, direct = 500, indirect = 100 });
@@ -43,7 +44,7 @@ namespace WikipediaDeathsPagesTests
             var sanitizedDateOfDeathReferences = "xFaG~!enwiki";
             var itemDto = CreateWikidataItemDto(description: "American singer, actress and model");
 
-            referenceResolverMock.Setup(_ => _.Resolve(deathDate, sanitizedDateOfDeathReferences, itemDto.Label, null)).Returns("");
+            referenceServiceMock.Setup(_ => _.Resolve(deathDate, sanitizedDateOfDeathReferences, itemDto.Label, null)).Returns("");
 
             wikidataServiceMock.Setup(_ => _.GetItemsPerDeathDate(deathDate, false)).Returns(new List<WikidataItemDto> { itemDto });
             wikidataServiceMock.Setup(_ => _.ResolveDateOfBirth(itemDto)).Returns((DateTime)itemDto.DateOfBirth);
@@ -62,11 +63,34 @@ namespace WikipediaDeathsPagesTests
             webClientMock.Setup(_ => _.GetWikiTextArticle(itemDto.ArticleName, out s)).Returns("infobox{{ | Death_cause   = car crash  | .. | ..}} She was an American singer, actress and model. She was born..");
             webClientMock.Setup(_ => _.GetWikiTextArticle($"Deaths in {month} {deathDate.Year}", out s)).Returns(returnWikiTextMonthArticle);
 
-            var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceResolverMock.Object, new WikiTextService(), toolforgeServiceMock.Object, webClientMock.Object, logger);
+            var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceServiceMock.Object, 
+                                                        new WikiTextService(), toolforgeServiceMock.Object, webClientMock.Object, logger);
 
             var result = wikipediaService.GetDeathDateResult(deathDate, 48);
 
             Assert.Equal("*[[Aaliyah]], 22, American singer, actress and model, aviation accident.", result.Entries.First().WikiText);
+        }
+
+        [Fact(DisplayName = "Resolve Olympic reference")]
+        public void HandleExceptionCorrectly()
+        {
+            string s;
+            var itemDto = CreateWikidataItemDto(description: "American singer, actress and model");
+
+            wikidataServiceMock.Setup(_ => _.GetItemsPerDeathDate(DateTime.MinValue, false)).Returns(new List<WikidataItemDto> { itemDto });
+            wikidataServiceMock.Setup(_ => _.ResolveItemLabel(itemDto)).Returns(itemDto.ArticleName);
+            webClientMock.Setup(_ => _.GetWikiTextArticle(itemDto.ArticleName, out s)).Returns($"{itemDto.ArticleName} was a Dutch athlete who was an Olympic champion.");
+
+            var wikipediaReferencesMock = new Mock<IWikipediaReferences>();
+            wikipediaReferencesMock.Setup(_ => _.GetIdsOfName(itemDto.ArticleName)).Throws<InvalidOperationException>();
+
+            var referenceService = new ReferenceService(wikipediaReferencesMock.Object, null, null);
+            var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceService, new WikiTextService(), toolforgeServiceMock.Object, webClientMock.Object, logger);
+
+            var expectedSubstring = $"error: {itemDto.ArticleName} [WikipediaService.ResolveEntryText]: Operation is not valid due to the current state of the object.";
+            var result = wikipediaService.GetDeathDateResult(DateTime.MinValue, 48);
+
+            Assert.Equal(expectedSubstring, result.Entries.First().WikiText);
         }
 
         [Fact]

@@ -9,21 +9,20 @@ using System.Diagnostics;
 
 namespace WikipediaDeathsPages.Tests
 {
-    public class ReferenceResolverShould
+    public class ReferenceServiceShould
     {
-        private readonly ReferenceResolver referenceResolver;
+        private readonly ReferenceService referenceService;
         private readonly Mock<IWikipediaReferences> wikipediaReferencesMock;
 
-        public ReferenceResolverShould()
+        public ReferenceServiceShould()
         {
-            var logger = new NullLogger<ReferenceResolver>();
-
             wikipediaReferencesMock = new Mock<IWikipediaReferences>();
-            referenceResolver = new ReferenceResolver(wikipediaReferencesMock.Object, logger);
+            referenceService = new ReferenceService(wikipediaReferencesMock.Object, null, null);
         }
-       
-        [Fact(DisplayName = "Resolve The Independent reference")]
-        public void ResolveTheIndependentReference()
+
+        // The Independent is the only non-sports website whose response is checked for the expected date death.
+        [Fact(DisplayName = "Resolve The Independent reference (1)")]
+        public void ResolveTheIndependentReferencePeople()
         {
             const string name = "Stanley Woods";
             const string url = "https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html";
@@ -32,7 +31,23 @@ namespace WikipediaDeathsPages.Tests
 
             var expectedSubstring1 = $"author1=Jim Reynolds |author-link1= |title=Obituary: Stanley Woods |url={url}";
             var expectedSubstring2 = $"work=[[The Independent]] |language= |date=30 July 1993";
-            var actualString = referenceResolver.Resolve(deathDate, dateOfDeathRef, name, null);
+            var actualString = referenceService.Resolve(deathDate, dateOfDeathRef, name, null);
+
+            Assert.Contains(expectedSubstring1, actualString);
+            Assert.Contains(expectedSubstring2, actualString);
+        }
+
+        [Fact(DisplayName = "Resolve The Independent reference (2)")]
+        public void ResolveTheIndependentReferenceIncoming()
+        {
+            const string name = "Harold Shepherdson";
+            const string url = "https://www.independent.co.uk/incoming/obituary-harold-shepherdson-5649167.html";
+            var deathDate = new DateTime(1995, 9, 13);
+            var dateOfDeathRef = $"enwiki~!reference URL: {url}";
+
+            var expectedSubstring1 = $"author1=Ivan Ponting |author-link1= |title=Obituary: Harold Shepherdson |url={url}";
+            var expectedSubstring2 = $"work=[[The Independent]] |language= |date=14 September 1995";
+            var actualString = referenceService.Resolve(deathDate, dateOfDeathRef, name, null);
 
             Assert.Contains(expectedSubstring1, actualString);
             Assert.Contains(expectedSubstring2, actualString);
@@ -138,7 +153,7 @@ namespace WikipediaDeathsPages.Tests
         public void ResolveWikidataReferences(string source, string articleLabel, string dateOfDeathRefs, string expectedSubstring)
         {
             Debug.WriteLine($"##### Testing source {source}...");
-            var actualString = referenceResolver.Resolve(DateTime.MinValue, dateOfDeathRefs, articleLabel, null);
+            var actualString = referenceService.Resolve(DateTime.MinValue, dateOfDeathRefs, articleLabel, null);
             Assert.Contains(expectedSubstring, actualString);
         }
 
@@ -159,7 +174,7 @@ namespace WikipediaDeathsPages.Tests
         public void ReturnNullIfWikidataUrlNotFound(string source, string dateOfDeathRefs)
         {
             Debug.WriteLine($"##### Testing source {source}...");
-            var actualString = referenceResolver.Resolve(DateTime.MinValue, dateOfDeathRefs, "John Doe", null);
+            var actualString = referenceService.Resolve(DateTime.MinValue, dateOfDeathRefs, "John Doe", null);
             Assert.Null(actualString);
         }
 
@@ -171,7 +186,7 @@ namespace WikipediaDeathsPages.Tests
             wikipediaReferencesMock.Setup(_ => _.GetIdsOfName(name)).Returns(new List<int> { 73711 });
 
             var expectedSubstring = $"title=Olympedia – {name} |url=https://www.olympedia.org/athletes/73711 |website=olympedia.org";
-            var actualString = referenceResolver.Resolve(deathDate, null, name, "Olympics");
+            var actualString = referenceService.Resolve(deathDate, null, name, "Olympics");
 
             Assert.Contains(expectedSubstring, actualString);
         }
@@ -257,7 +272,7 @@ namespace WikipediaDeathsPages.Tests
         public void ResolveWebsiteReferences(string knownFor, string websiteName, string articleLabel, string deathDateString, string expectedSubstring)
         {
             Debug.WriteLine($"##### Testing website {websiteName}...");
-            var actualString = referenceResolver.Resolve(DateTime.Parse(deathDateString), null, articleLabel, knownFor);
+            var actualString = referenceService.Resolve(DateTime.Parse(deathDateString), null, articleLabel, knownFor);
             Assert.Contains(expectedSubstring, actualString);
         }
 
@@ -276,7 +291,7 @@ namespace WikipediaDeathsPages.Tests
         public void ReturnNullIfWebsiteUrlNotFound(string knownFor, string websiteName)
         {
             Debug.WriteLine($"##### Testing website {websiteName}...");
-            var actualString = referenceResolver.Resolve(DateTime.MinValue, null, "Noty Foundy", knownFor);
+            var actualString = referenceService.Resolve(DateTime.MinValue, null, "Noty Foundy", knownFor);
             Assert.Null(actualString);
         }
     }

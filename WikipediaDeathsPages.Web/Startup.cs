@@ -50,7 +50,7 @@ namespace WikipediaDeathsPages
             services.AddScoped<IWikipediaService, WikipediaService>();
             services.AddScoped<IWikidataService, WikidataService>();
             services.AddScoped<IWikiTextService, WikiTextService>();
-            services.AddScoped<IReferenceResolver, ReferenceResolver>();
+            services.AddScoped<IReferenceService, ReferenceService>();
             services.AddScoped<IToolforgeService, ToolforgeService>();
         }
 

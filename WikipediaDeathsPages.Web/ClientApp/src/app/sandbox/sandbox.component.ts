@@ -1,7 +1,5 @@
-import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
-import { DeathDateResultDto } from '../dto/DeathDateResultDto';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { DeathEntryDto } from '../dto/DeathEntryDto';
+import { Component, Inject, } from '@angular/core';
+import { HttpClient, } from '@angular/common/http';
 
 @Component({
   selector: 'app-sandbox-component',
@@ -9,64 +7,74 @@ import { DeathEntryDto } from '../dto/DeathEntryDto';
 })
 export class SandboxComponent {
 
-  public currentCount = 0;
-  isBusy = false;
-  scoreNumberFour: number = -1;
-  entries: DeathEntryDto[];
-  validSite: boolean;
+  MAXWEBSITES =   1;
+  validWebsites = 1; // makes sure that allSitesOk() is true at init
+  checkedWebsites = 0;
+  checkingWebsites = false;
+  checkResults: boolean[] = new Array(this.MAXWEBSITES).fill(false);
 
   constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {  
   }
 
-  public incrementCounter() {
-    this.currentCount++;
-  }
-
-  onFetchOrig(){    
-    this.isBusy = true;    
-
-    this.http.get<DeathDateResultDto>(this.baseUrl + 'wikipedia/1984-1-17/48').subscribe(result => {   
-      
-      this.scoreNumberFour = result.scoreNumberFour;
-      this.entries = result.entries;        
-
-      this.isBusy = false;          
-    }, error => {
-      this.isBusy = false;
-      console.error(error);}
-      );
-  }
-
-  onFetchTestStringArray(){    
-    this.isBusy = true;    
-    let urlParam = 'https://www.britannica.com/biography/Utpal-Dutt';
-
-    let params = new HttpParams();
-    const actors = ['Elvis', 'Jane', 'Frances'];
-    params.append('actors', JSON.stringify(actors));
+  checkWebsites(){
+    this.validWebsites = 0;
+    this.checkedWebsites = 0;
+    this.checkingWebsites = true;
+    this.checkWebsite(0, 'https://www.britannica.com/biography/Utpal-Dutt', 'Utpal Dutt', 'August 19, 1993');    
+    //this.checkWebsite('https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html', 'Obituary: Stanley Woods', '<amp-state id="digitalData"');
     
-    //this.http.get(url, { params });
-    this.http.get<boolean>(this.baseUrl + 'reference/test', { params }).subscribe(result => {         
-    this.validSite = result;      
-    this.isBusy = false;          
+  }
+
+  checkWebsite(index: number, url:string, firstSearchPhrase: string, secondSearchPhrase: string){            
+
+    this.checkedWebsites++;
+    console.log('checking Encyclopædia Britannica...');
+    this.http.get<boolean>(this.baseUrl + 'reference/' + encodeURIComponent(url) + '/' + firstSearchPhrase + '/' + secondSearchPhrase).subscribe(result => {         
+    this.checkResults[index] = result;      
+    
+    // TODO
+    //this.checkResults[index] = false;
+
+    if(this.checkResults[index])
+      this.validWebsites++;
+
+    if(this.checkedWebsites == this.MAXWEBSITES)
+      this.checkingWebsites = false;
+
     }, error => {
-      this.isBusy = false;
       console.error(error);}
       );
   }
 
+  public allSitesOk(){
+    console.log('allSitesOk: ' + (this.validWebsites == this.MAXWEBSITES))
+    return this.validWebsites == this.MAXWEBSITES;
+  }
+
+  //  -----
+
+  getImageSource(found:boolean):string{
+    if(found){
+     return "../../assets/ok.png";
+    }
+    else{
+     return "../../assets/nok.png";
+    }
+  }
+
+  /*
   onFetch(){    
-    this.isBusy = true;    
+    this.notAllSitesOk = true;    
     let urlParam = encodeURIComponent('https://www.britannica.com/biography/Utpal-Dutt');
 
     this.http.get<boolean>(this.baseUrl + 'reference/' + urlParam + '/' + 'Utpal Dutt' + '/' + 'August 19, 1993').subscribe(result => {         
-    this.validSite = result;      
-    this.isBusy = false;          
+    this.validSiteBritannica = result;      
+    this.notAllSitesOk = false;          
     }, error => {
-      this.isBusy = false;
+      this.notAllSitesOk = false;
       console.error(error);}
       );
   }
-
+  */
 
 }

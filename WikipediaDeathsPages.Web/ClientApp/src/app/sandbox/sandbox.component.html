@@ -1,12 +1,25 @@
 <h4>Sandbox</h4>
 
-<p>Current count: <strong>{{ currentCount }}</strong>&nbsp;&nbsp;Score #4: <strong>{{ scoreNumberFour }}</strong></p>
 
-<button class="btn btn-primary" (click)="incrementCounter()">Increment</button>
-<span class="space6px"></span>
-<button type="button" class="btn btn-primary" (click)="onFetch()" [disabled]="isBusy">fetch</button>
-
-<p *ngIf="isBusy; else elseBlock2"><em>Please wait...</em></p>
-<ng-template #elseBlock2><div>&nbsp;;)&nbsp;</div></ng-template>
+<button type="button" class="btn btn-primary" (click)="checkWebsites()" [disabled]="checkingWebsites">Check sites</button>
 <hr>
-result: {{ validSite }}
+<div *ngIf="!allSitesOk(); else elseBlock2">
+    <table class="table table-sm"> <!-- bootstrap class table-striped niet gebruiken: overwrites [ngClass] -->
+        <thead class="thead-dark">
+        <tr>      
+          <td colspan="2">Checking reference websites. <strong>{{checkedWebsites}}</strong> of {{MAXWEBSITES}} sites checked</td>   
+        </tr> 
+        <tr>    
+          <th style="width: 75%;">website</th>
+          <th style="width: 25%;">result</th>
+        </tr>  
+      </thead>
+      <tbody>  
+        <tr>      
+          <td>Encyclopædia Britannica:</td><td><img src="{{getImageSource(checkResults[0])}}" style="max-height: 20px"></td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+<ng-template #elseBlock2><div>;)</div></ng-template>
+

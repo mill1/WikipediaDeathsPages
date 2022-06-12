@@ -1,6 +1,6 @@
 import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
 import { DeathDateResultDto } from '../dto/DeathDateResultDto';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { DeathEntryDto } from '../dto/DeathEntryDto';
 
 @Component({
@@ -37,9 +37,16 @@ export class SandboxComponent {
       );
   }
 
-  onFetchTest(){    
+  onFetchTestStringArray(){    
     this.isBusy = true;    
-    this.http.get<boolean>(this.baseUrl + 'reference/check/https:%2F%2Fwww.nu.nl/John Doe').subscribe(result => {         
+    let urlParam = 'https://www.britannica.com/biography/Utpal-Dutt';
+
+    let params = new HttpParams();
+    const actors = ['Elvis', 'Jane', 'Frances'];
+    params.append('actors', JSON.stringify(actors));
+    
+    //this.http.get(url, { params });
+    this.http.get<boolean>(this.baseUrl + 'reference/test', { params }).subscribe(result => {         
     this.validSite = result;      
     this.isBusy = false;          
     }, error => {
@@ -50,11 +57,9 @@ export class SandboxComponent {
 
   onFetch(){    
     this.isBusy = true;    
-    let url = 'https://www.britannica.com/biography/Utpal-Dutt';
+    let urlParam = encodeURIComponent('https://www.britannica.com/biography/Utpal-Dutt');
 
-    console.log('encoded: ' + encodeURIComponent(url));
-
-    this.http.get<boolean>(this.baseUrl + 'reference/check/' + encodeURIComponent(url) + '/Utpal Dutt').subscribe(result => {         
+    this.http.get<boolean>(this.baseUrl + 'reference/' + urlParam + '/' + 'Utpal Dutt' + '/' + 'August 19, 1993').subscribe(result => {         
     this.validSite = result;      
     this.isBusy = false;          
     }, error => {

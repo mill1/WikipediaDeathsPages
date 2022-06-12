@@ -99,8 +99,7 @@ namespace WikipediaDeathsPages.Service
             return Resolve(existingEntry.Reference, deathDate, dateOfDeathReferences, GetArticleLabel(articleLinkedName), knownFor);
         }
 
-        // TODO string array
-        public bool CheckWebsite(string encodedUrl, string searchPhrases)
+        public bool CheckWebsite(string encodedUrl, List<string> searchPhrases)
         {
             string url = System.Web.HttpUtility.UrlDecode(encodedUrl);
 
@@ -109,7 +108,13 @@ namespace WikipediaDeathsPages.Service
             if (response == null)
                 return false;
 
-            return response.Contains(searchPhrases);
+            foreach (var phrase in searchPhrases)
+            {
+                if (!response.Contains(phrase))
+                    return false;
+            }
+
+            return true;
         }
 
         private ExistingEntryDto CreateExistingEntryDto(string wikiText, DateTime deathDate, string articleLinkedName)

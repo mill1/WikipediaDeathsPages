@@ -1,27 +1,38 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
+import { DeathDateResultDto } from '../dto/DeathDateResultDto';
+import { HttpClient } from '@angular/common/http';
+import { DeathEntryDto } from '../dto/DeathEntryDto';
 
 @Component({
   selector: 'app-sandbox-component',
   templateUrl: './sandbox.component.html'
 })
 export class SandboxComponent {
+
   public currentCount = 0;
-  @ViewChild('selectedDate', {static: false}) dateInput: ElementRef;
-  //entries:
+  isBusy = false;
+  scoreNumberFour: number = -1;
+  entries: DeathEntryDto[];
+
+  constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {  
+  }
 
   public incrementCounter() {
     this.currentCount++;
-
-    alert(this.hasDuplicates(["A", "A"])) // true
-    alert(this.hasDuplicates(["A", "B"])) // false
   }
 
-  hasDuplicates<T>(arr: T[]): boolean {
-    return new Set(arr).size < arr.length;
-  }
+  onFetch(){    
+    this.isBusy = true;    
 
-  onClick(){
-    let selectedDate: Date = new Date(this.dateInput.nativeElement.value);
-    alert(selectedDate);   
-  }  
+    this.http.get<DeathDateResultDto>(this.baseUrl + 'wikipedia/1984-1-17/48').subscribe(result => {   
+      
+      this.scoreNumberFour = result.scoreNumberFour;
+      this.entries = result.entries;        
+
+      this.isBusy = false;          
+    }, error => {
+      this.isBusy = false;
+      console.error(error);}
+      );
+  }
 }

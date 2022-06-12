@@ -448,7 +448,7 @@ namespace WikipediaDeathsPages.Service
                 return true;
 
             // http://www.britannica.com/EBchecked/topic/18816/Viktor-Amazaspovich-Ambartsumian
-            if (ReferenceUrlFound("http://www.britannica.com", referenceItems, true, ref referenceUrl))    // oud in Wikidata: http://
+            if (ReferenceUrlFound("http://www.britannica.com", referenceItems, true, ref referenceUrl))    // oud in Wikidata: check redirect
                 return true;
 
             // https://www.britannica.com/biography/Donald-Alfred-Davie
@@ -467,7 +467,7 @@ namespace WikipediaDeathsPages.Service
 
         private bool BiografischPortaalUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
-            // e.g. http://www.biografischportaal.nl/persoon/87547041  // nog steeds http:// https levert warning op (Chrome)
+            // e.g. http://www.biografischportaal.nl/persoon/87547041  // nog steeds http. https levert warning op (Chrome)
             return ReferenceUrlFound("http://www.biografischportaal.nl/persoon/", referenceItems, true, ref referenceUrl);
         }
 

@@ -7,11 +7,11 @@ import { HttpClient, } from '@angular/common/http';
 })
 export class SandboxComponent {
 
-  MAXWEBSITES =   1;
-  validWebsites = 1; // makes sure that allSitesOk() is true at init
-  checkedWebsites = 0;
-  checkingWebsites = false;
+  MAXWEBSITES = 5;
+  validWebsites = this.MAXWEBSITES;    // makes sure that allSitesOk() is true at init (show #elseBlock2)
+  checkedWebsites = this.MAXWEBSITES;; // makes sure button is enabled  
   checkResults: boolean[] = new Array(this.MAXWEBSITES).fill(false);
+  checkStatus: string;
 
   constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {  
   }
@@ -19,35 +19,38 @@ export class SandboxComponent {
   checkWebsites(){
     this.validWebsites = 0;
     this.checkedWebsites = 0;
-    this.checkingWebsites = true;
-    this.checkWebsite(0, 'https://www.britannica.com/biography/Utpal-Dutt', 'Utpal Dutt', 'August 19, 1993');    
-    //this.checkWebsite('https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html', 'Obituary: Stanley Woods', '<amp-state id="digitalData"');
-    
+    this.checkStatus = 'Checking reference websites...';
+    this.checkWebsite(0, 'https://www.britannica.com/biography/Utpal-Dutt', 'Utpal Dutt', 'August 19, 1993');
+    this.checkWebsite(1, 'http://www.britannica.com/EBchecked/topic/18816/Viktor-Amazaspovich-Ambartsumian', 'Viktor Ambartsumian', 'August 12, 1996');
+    this.checkWebsite(2, 'https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html', 'Obituary: Stanley Woods', '<amp-state id="digitalData"');
+    this.checkWebsite(3, 'https://www.independent.co.uk/incoming/obituary-harold-shepherdson-5649167.html', 'Obituary: Harold Shepherdson', '<amp-state id="digitalData"');
+    this.checkWebsite(4, 'https://www.ibdb.com/broadway-cast-staff/88297', 'Tom Fuccello', 'Aug 16, 1993');
   }
 
   checkWebsite(index: number, url:string, firstSearchPhrase: string, secondSearchPhrase: string){            
-
-    this.checkedWebsites++;
-    console.log('checking Encyclopædia Britannica...');
+    
     this.http.get<boolean>(this.baseUrl + 'reference/' + encodeURIComponent(url) + '/' + firstSearchPhrase + '/' + secondSearchPhrase).subscribe(result => {         
     this.checkResults[index] = result;      
-    
-    // TODO
-    //this.checkResults[index] = false;
 
     if(this.checkResults[index])
       this.validWebsites++;
 
-    if(this.checkedWebsites == this.MAXWEBSITES)
-      this.checkingWebsites = false;
-
+    this.finalizeCheck();
     }, error => {
-      console.error(error);}
-      );
+      this.finalizeCheck();
+      console.error(error);
+    });        
   }
 
-  public allSitesOk(){
-    console.log('allSitesOk: ' + (this.validWebsites == this.MAXWEBSITES))
+  finalizeCheck(){
+    this.checkedWebsites++;    
+    if (this.checkedWebsites == this.MAXWEBSITES){
+      this.checkStatus = 'Check complete';
+    }
+  }
+
+  allSitesOk(): boolean{
+    //console.log('allSitesOk: ' + (this.validWebsites == this.MAXWEBSITES) + ' (' + this.validWebsites + '-' + this.MAXWEBSITES + ')')
     return this.validWebsites == this.MAXWEBSITES;
   }
 

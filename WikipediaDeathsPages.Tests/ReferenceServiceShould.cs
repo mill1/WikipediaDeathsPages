@@ -63,7 +63,7 @@ namespace WikipediaDeathsPages.Tests
         [InlineData(
             "Encyclopædia Britannica Online (2)",
             "Donald Davie",
-            "enwiki~!reference URL: http://www.britannica.com/biography/Donald-Alfred-Davie",  // http
+            "enwiki~!reference URL: http://www.britannica.com/biography/Donald-Alfred-Davie",  // http in Wikidata
             "title=Donald Davie |url=http://www.britannica.com/biography/Donald-Alfred-Davie |website=britannica.com"
         )]
         [InlineData(

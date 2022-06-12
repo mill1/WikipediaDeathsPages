@@ -22,7 +22,6 @@ namespace WikipediaDeathsPages.Controllers
             this.referenceService = referenceService;
         }
 
-
         [HttpGet("{article}/{deathDate}")]
         public string GetReference(string article, DateTime deathDate)
         {

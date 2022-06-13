@@ -13,6 +13,7 @@ import { BsDatepickerConfig, BsDatepickerModule, BsDaterangepickerConfig } from 
 import { DeathDayComponent } from './death-day/death-day.component';
 import { NgbdSortableHeader } from './wikidata-details/wikidata-details.component';
 import { WikidataDetailsComponent } from './wikidata-details/wikidata-details.component';
+import { WebsitesCheckComponent } from './websites-check/websites-check.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { WikidataDetailsComponent } from './wikidata-details/wikidata-details.co
     DeathDayComponent,
     NgbdSortableHeader,
     WikidataDetailsComponent,
+    WebsitesCheckComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

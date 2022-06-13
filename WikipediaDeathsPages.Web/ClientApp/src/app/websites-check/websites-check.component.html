@@ -13,7 +13,7 @@
       </thead>
       <tbody>  
         <tr *ngFor="let website of websites; index as i" [ngClass]="{'success': websites[i].checkResult, 'fail': !websites[i].checkResult}">
-          <td>{{websites[i].name}}:</td><td><a href="{{websites[i].url}}" target="_blank">url</a> </td><td><img src="{{getImageSource(websites[i].checkResult)}}"></td>
+          <td>{{websites[i].name}}</td><td><a href="{{websites[i].url}}" target="_blank">url</a> </td><td><img src="{{getImageSource(websites[i].checkResult)}}"></td>
         </tr>
       </tbody>
     </table>

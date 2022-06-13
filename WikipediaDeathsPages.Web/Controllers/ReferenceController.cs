@@ -33,7 +33,7 @@ namespace WikipediaDeathsPages.Controllers
         [HttpGet("{url}/{firstSearchPhrase}/{secondSearchPhrase}")]
         public bool CheckWebsite(string url, string firstSearchPhrase, string secondSearchPhrase)
         {
-            // https://localhost:44304/reference/check/https:%2F%2Fwww.nu.nl/John%20Doe
+            // https://localhost:44304/reference/https:%2F%2Fwww.nu.nl/John%20Doe/1979-12-24
             return referenceService.CheckWebsite(url, new List<string> { firstSearchPhrase, secondSearchPhrase });
         }
 

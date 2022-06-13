@@ -10,5 +10,6 @@ namespace WikipediaDeathsPages.Service.Interfaces
         string Resolve(string existingReference, DateTime deathDate, string dateOfDeathReferences, string articleLabel, string knownFor);
         List<string> GetReferenceItems(string dateOfDeathreferences);
         string Resolve(ExistingEntryDto existingEntry, string dateOfDeathReferences, string wikiText, string articleLabel, DateTime deathDate);
+        bool CheckWebsite(string encodedUrl, List<string> searchPhrases);
     }
 }

@@ -1,0 +1,21 @@
+<button type="button" class="btn btn-primary" (click)="checkWebsites()" [disabled]="checkedWebsites !== MAXWEBSITES">Check reference sites</button>
+<div *ngIf="!allSitesOk(); else elseBlock">
+    <table class="table table-sm"> <!-- bootstrap class table-striped niet gebruiken: overwrites [ngClass] -->
+        <thead class="thead-dark">
+        <tr>      
+          <td colspan="3" style="background-color:white;"><h6>{{checkStatus}}</h6></td>   
+        </tr> 
+        <tr>    
+          <th style="width: 40%;">website</th>
+          <th style="width: 10%;">&nbsp;</th>
+          <th style="width: 50%;">result</th>
+        </tr>  
+      </thead>
+      <tbody>  
+        <tr *ngFor="let website of websites; index as i" [ngClass]="{'success': websites[i].checkResult, 'fail': !websites[i].checkResult}">
+          <td>{{websites[i].name}}</td><td><a href="{{websites[i].url}}" target="_blank">url</a> </td><td><img src="{{getImageSource(websites[i].checkResult)}}"></td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+<ng-template #elseBlock><div></div></ng-template>

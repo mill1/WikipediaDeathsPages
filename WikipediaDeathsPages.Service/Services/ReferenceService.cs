@@ -99,6 +99,24 @@ namespace WikipediaDeathsPages.Service
             return Resolve(existingEntry.Reference, deathDate, dateOfDeathReferences, GetArticleLabel(articleLinkedName), knownFor);
         }
 
+        public bool CheckWebsite(string encodedUrl, List<string> searchPhrases)
+        {
+            string url = System.Web.HttpUtility.UrlDecode(encodedUrl);
+
+            var response = DownloadString(url, false);
+
+            if (response == null)
+                return false;
+
+            foreach (var phrase in searchPhrases)
+            {
+                if (!response.Contains(phrase))
+                    return false;
+            }
+
+            return true;
+        }
+
         private ExistingEntryDto CreateExistingEntryDto(string wikiText, DateTime deathDate, string articleLinkedName)
         {
             return new ExistingEntryDto()
@@ -430,7 +448,7 @@ namespace WikipediaDeathsPages.Service
                 return true;
 
             // http://www.britannica.com/EBchecked/topic/18816/Viktor-Amazaspovich-Ambartsumian
-            if (ReferenceUrlFound("http://www.britannica.com", referenceItems, true, ref referenceUrl))    // oud in Wikidata: http://
+            if (ReferenceUrlFound("http://www.britannica.com", referenceItems, true, ref referenceUrl))    // oud in Wikidata: check redirect
                 return true;
 
             // https://www.britannica.com/biography/Donald-Alfred-Davie
@@ -449,7 +467,7 @@ namespace WikipediaDeathsPages.Service
 
         private bool BiografischPortaalUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
-            // e.g. http://www.biografischportaal.nl/persoon/87547041  // nog steeds http:// https levert warning op (Chrome)
+            // e.g. http://www.biografischportaal.nl/persoon/87547041  // nog steeds http. https levert warning op (Chrome)
             return ReferenceUrlFound("http://www.biografischportaal.nl/persoon/", referenceItems, true, ref referenceUrl);
         }
 

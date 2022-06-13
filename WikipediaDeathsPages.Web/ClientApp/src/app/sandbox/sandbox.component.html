@@ -1,18 +1,21 @@
-<h4>Sandbox</h4>
-
-<p aria-live="polite">Current count: <strong>{{ currentCount }}</strong></p>
-
-<button class="btn btn-primary" (click)="incrementCounter()">Increment</button>
-<hr>
-<div class="container">
-  <div class="row">
-    <div class="col-xs-12 col-12 col-md-4 form-group">
-      <input type="text"
-            class="form-control"
-            placeholder="Select a date"
-            bsDatepicker
-            #selectedDate>
-    </div>
-    <button type="button" class="btn btn-primary" (click)="onClick()">click</button>
-  </div>
+<button type="button" class="btn btn-primary" (click)="checkWebsites()" [disabled]="checkedWebsites !== MAXWEBSITES">Check reference sites</button>
+<div *ngIf="!allSitesOk(); else elseBlock">
+    <table class="table table-sm"> <!-- bootstrap class table-striped niet gebruiken: overwrites [ngClass] -->
+        <thead class="thead-dark">
+        <tr>      
+          <td colspan="2"><h6>{{checkStatus}}</h6></td>   
+        </tr> 
+        <tr>    
+          <th style="width: 75%;">website</th>
+          <th style="width: 25%;">result</th>
+        </tr>  
+      </thead>
+      <tbody>  
+        <tr><td>Encyclopædia Britannica Online:</td><td><img src="{{getImageSource(checkResults[0])}}" style="max-height: 20px"></td></tr>        
+        <tr><td>The Independent:               </td><td><img src="{{getImageSource(checkResults[2])}}" style="max-height: 20px"></td></tr>        
+        <tr><td>Internet Broadway Database (IBDB)  </td><td><img src="{{getImageSource(checkResults[4])}}" style="max-height: 20px"></td></tr>
+      </tbody>
+    </table>
 </div>
+<ng-template #elseBlock><div></div></ng-template>
+

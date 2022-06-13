@@ -1,1 +1,33 @@
-<p>websites-check works!</p>
+<button type="button" class="btn btn-primary" (click)="checkWebsites()" [disabled]="checkedWebsites !== MAXWEBSITES">Check sites</button>
+<div *ngIf="!allSitesOk(); else elseBlock">
+    <table class="table table-sm"> <!-- bootstrap class table-striped niet gebruiken: overwrites [ngClass] -->
+        <thead class="thead-dark">
+        <tr>      
+          <td colspan="3" style="background-color:white;"><h6>{{checkStatus}}</h6></td>   
+        </tr> 
+        <tr>    
+          <th style="width: 40%;">website</th>
+          <th style="width: 10%;">&nbsp;</th>
+          <th style="width: 50%;">result</th>
+        </tr>  
+      </thead>
+      <tbody>  
+        <tr [ngClass]="{'success': checkResults[0], 'fail': !checkResults[0]}">
+            <td>Encyclopædia Britannica Online (1):</td><td><a href="{{urls[0]}}" target="_blank">url</a> </td><td><img src="{{getImageSource(checkResults[0])}}"></td>
+        </tr>
+        <tr [ngClass]="{'success': checkResults[1], 'fail': !checkResults[1]}">
+            <td>Encyclopædia Britannica Online (2):</td><td>link</td><td><img src="{{getImageSource(checkResults[1])}}" style="max-height: 20px"></td>
+        </tr>
+        <tr [ngClass]="{'success': checkResults[2], 'fail': !checkResults[2]}">
+            <td>The Independent (1):               </td><td>link</td><td><img src="{{getImageSource(checkResults[2])}}" style="max-height: 20px"></td>
+        </tr>
+        <tr [ngClass]="{'success': checkResults[3], 'fail': !checkResults[3]}">
+            <td>The Independent (2):               </td><td>link</td><td><img src="{{getImageSource(checkResults[3])}}" style="max-height: 20px"></td>
+        </tr>
+        <tr [ngClass]="{'success': checkResults[4], 'fail': !checkResults[4]}">
+            <td>Internet Broadway Database (IBDB)  </td><td>link</td><td><img src="{{getImageSource(checkResults[4])}}" style="max-height: 20px"></td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+<ng-template #elseBlock><div></div></ng-template>

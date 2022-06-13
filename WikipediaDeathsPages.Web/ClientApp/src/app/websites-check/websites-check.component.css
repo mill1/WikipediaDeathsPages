@@ -1,0 +1,15 @@
+/*
+td {
+    background-color: lightgrey;
+  }
+*/
+img{
+    max-height: 20px
+}
+.success{
+    background-color: rgb(50, 255, 50);
+}
+.fail{
+    background-color: white; /* red;
+    color: white;              */
+}

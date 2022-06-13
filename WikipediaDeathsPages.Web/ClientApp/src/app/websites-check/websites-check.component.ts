@@ -81,7 +81,7 @@ export class WebsitesCheckComponent {
       }, 
       { name: 'Encyclopædia Britannica Online (2)', 
         url: 'http://www.britannica.com/EBchecked/topic/18816/Viktor-Amazaspovich-Ambartsumian', 
-        firstSearchPhrase: 'Viktor Ambartsumian', secondSearchPhrase: 'August 12, 199996', checkResult: false
+        firstSearchPhrase: 'Viktor Ambartsumian', secondSearchPhrase: 'August 12, 1996', checkResult: false
       },
       { name: 'The Independent (1)', 
         url: 'https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html', 

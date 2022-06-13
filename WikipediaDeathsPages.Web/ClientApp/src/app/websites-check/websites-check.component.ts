@@ -1,5 +1,6 @@
 import { Component, OnInit, Inject, } from '@angular/core';
 import { HttpClient, } from '@angular/common/http';
+import { Website } from '../model/Website';
 
 @Component({
   selector: 'app-websites-check',
@@ -8,51 +9,71 @@ import { HttpClient, } from '@angular/common/http';
 })
 export class WebsitesCheckComponent {
 
-  urls: string[];
-  MAXWEBSITES: number;
-  validWebsites: number;
-  checkedWebsites: number;
-  checkResults: boolean[];
+  websites: Website[];
+  validWebsitesCount: number;
+  checkedWebsitesCount: number;  
   checkStatus: string;
 
   constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {  
 
-    this.initializeWebsites();
-    this.MAXWEBSITES = this.urls.length;
-    this.validWebsites = this.MAXWEBSITES;    // makes sure that allSitesOk() is true at init (show #elseBlock2)
-    this.checkedWebsites = this.MAXWEBSITES;  // makes sure button is enabled  
-    this.checkResults = new Array(this.MAXWEBSITES).fill(false);
+    this.initializeWebsites();    
+    this.validWebsitesCount = this.websites.length;    // makes sure that allSitesOk() is true at init (show #elseBlock2)
+    this.checkedWebsitesCount = this.websites.length;  // makes sure button is enabled    
   }
 
   initializeWebsites(){
 
-    this.urls=[
-      'https://www.britannica.com/biography/Utpal-Dutt',
-      'http://www.britannica.com/EBchecked/topic/18816/Viktor-Amazaspovich-Ambartsumian',
-      'https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html',
-      'https://www.independent.co.uk/incoming/obituary-harold-shepherdson-5649167.html', 
-      'https://www.ibdb.com/broadway-cast-staff/88297' 
-    ];
+    this.websites = [ 
+      { name: 'Encyclopædia Britannica Online (1)', 
+        url: 'https://www.britannica.com/biography/Utpal-Dutt', 
+        firstSearchPhrase: 'Utpal Dutt', secondSearchPhrase: 'August 19, 1993', checkResult: false
+      }, 
+      { name: 'Encyclopædia Britannica Online (2)', 
+        url: 'http://www.britannica.com/EBchecked/topic/18816/Viktor-Amazaspovich-Ambartsumian', 
+        firstSearchPhrase: 'Viktor Ambartsumian', secondSearchPhrase: 'August 12, 199996', checkResult: false
+      },
+      { name: 'The Independent (1)', 
+        url: 'https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html', 
+        firstSearchPhrase: 'Obituary: Stanley Woods', secondSearchPhrase: '<amp-state id="digitalData"', checkResult: false
+      },
+      { name: 'The Independent (2)', 
+        url: 'https://www.independent.co.uk/incoming/obituary-harold-shepherdson-5649167.html', 
+        firstSearchPhrase: 'Obituary: Harold Shepherdson', secondSearchPhrase: '<amp-state id="digitalData"', checkResult: false
+      },
+      { name: 'Internet Broadway Database (IBDB)', 
+        url: 'https://www.ibdb.com/broadway-cast-staff/88297', 
+        firstSearchPhrase: 'Tom Fuccello', secondSearchPhrase: 'Aug 16, 1993', checkResult: false
+      },
+      /*
+      { name: '', 
+        url: '', 
+        firstSearchPhrase: '', secondSearchPhrase: '', checkResult: false
+      },
+      */
+    ]
   }
 
   checkWebsites(){
-    this.validWebsites = 0;
-    this.checkedWebsites = 0;
+
+    this.validWebsitesCount = 0;
+    this.checkedWebsitesCount = 0;
     this.checkStatus = 'Checking reference websites...';
-    this.checkWebsite(0, this.urls[0], 'Utpal Dutt', 'August 19, 1993');
-    this.checkWebsite(1, this.urls[1], 'Viktor Ambartsumian', 'August 12, 1996');
-    this.checkWebsite(2, this.urls[2], 'Obituary: Stanley Woods', '<amp-state id="digitalData"');
-    this.checkWebsite(3, this.urls[3], 'Obituary: Harold Shepherdson', '<ap-state id="digitalData"');
-    this.checkWebsite(4, this.urls[4], 'Tom Fuccello', 'Aug 16, 1993');
+
+    for (let website of this.websites) {
+      this.checkWebsite(website);
+    }
+
   }
 
-  checkWebsite(index: number, url:string, firstSearchPhrase: string, secondSearchPhrase: string){            
+  checkWebsite(website:Website){            
     
-    this.http.get<boolean>(this.baseUrl + 'reference/' + encodeURIComponent(url) + '/' + firstSearchPhrase + '/' + secondSearchPhrase).subscribe(result => {         
-    this.checkResults[index] = result;      
+    this.http.get<boolean>(this.baseUrl + 'reference/' + encodeURIComponent(website.url) + '/' + 
+    website.firstSearchPhrase + '/' + website.secondSearchPhrase).subscribe(result => { 
+    
+    website.checkResult = result;
 
-    if(this.checkResults[index])
-      this.validWebsites++;
+    if(website.checkResult)
+      this.validWebsitesCount++;
 
     this.finalizeCheck();
     }, error => {
@@ -62,15 +83,15 @@ export class WebsitesCheckComponent {
   }
 
   finalizeCheck(){
-    this.checkedWebsites++;    
-    if (this.checkedWebsites == this.MAXWEBSITES){
+    this.checkedWebsitesCount++;    
+    if (this.checkedWebsitesCount == this.websites.length){
       this.checkStatus = 'Check complete';
     }
   }
 
   allSitesOk(): boolean{
-    //console.log('allSitesOk: ' + (this.validWebsites == this.MAXWEBSITES) + ' (' + this.validWebsites + '-' + this.MAXWEBSITES + ')')
-    return this.validWebsites == this.MAXWEBSITES;
+    //console.log('allSitesOk: ' + (this.validWebsitesCount == this.websites.length) + ' (' + this.validWebsitesCount + '-' + this.websites.length + ')')
+    return this.validWebsitesCount == this.websites.length;
   }
 
   getImageSource(found:boolean):string{

@@ -1,4 +1,4 @@
-<button type="button" class="btn btn-primary" (click)="checkWebsites()" [disabled]="checkedWebsites !== MAXWEBSITES">Check sites</button>
+<button type="button" class="btn btn-primary" (click)="checkWebsites()" [disabled]="checkedWebsites !== MAXWEBSITES">Check reference sites</button>
 <div *ngIf="!allSitesOk(); else elseBlock">
     <table class="table table-sm"> <!-- bootstrap class table-striped niet gebruiken: overwrites [ngClass] -->
         <thead class="thead-dark">
@@ -11,10 +11,8 @@
         </tr>  
       </thead>
       <tbody>  
-        <tr><td>Encyclopædia Britannica Online (1):</td><td><img src="{{getImageSource(checkResults[0])}}" style="max-height: 20px"></td></tr>
-        <tr><td>Encyclopædia Britannica Online (2) (fail; see 2nd search phrase):</td><td><img src="{{getImageSource(checkResults[1])}}" style="max-height: 20px"></td></tr>
-        <tr><td>The Independent (1):               </td><td><img src="{{getImageSource(checkResults[2])}}" style="max-height: 20px"></td></tr>
-        <tr><td>The Independent (2):               </td><td><img src="{{getImageSource(checkResults[3])}}" style="max-height: 20px"></td></tr>
+        <tr><td>Encyclopædia Britannica Online:</td><td><img src="{{getImageSource(checkResults[0])}}" style="max-height: 20px"></td></tr>        
+        <tr><td>The Independent:               </td><td><img src="{{getImageSource(checkResults[2])}}" style="max-height: 20px"></td></tr>        
         <tr><td>Internet Broadway Database (IBDB)  </td><td><img src="{{getImageSource(checkResults[4])}}" style="max-height: 20px"></td></tr>
       </tbody>
     </table>

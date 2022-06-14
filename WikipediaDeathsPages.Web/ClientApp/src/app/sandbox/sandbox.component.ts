@@ -8,8 +8,8 @@ import { HttpClient, } from '@angular/common/http';
 export class SandboxComponent {
 
   MAXWEBSITES = 3;
-  validWebsites = this.MAXWEBSITES;    // makes sure that allSitesOk() is true at init (show #elseBlock2)
-  checkedWebsites = this.MAXWEBSITES;  // makes sure button is enabled  
+  validWebsitesCount = this.MAXWEBSITES;    // makes sure that allSitesOk() is true at init (show #elseBlock2)
+  checkedWebsitesCount = this.MAXWEBSITES;  // makes sure button is enabled  
   checkResults: boolean[] = new Array(this.MAXWEBSITES).fill(false);
   checkStatus: string;
 
@@ -17,8 +17,8 @@ export class SandboxComponent {
   }
 
   checkWebsites(){
-    this.validWebsites = 0;
-    this.checkedWebsites = 0;
+    this.validWebsitesCount = 0;
+    this.checkedWebsitesCount = 0;
     this.checkStatus = 'Checking reference websites...';
     this.checkWebsite(0, 'https://www.britannica.com/biography/Utpal-Dutt', 'Utpal Dutt', 'August 19, 1993');    
     this.checkWebsite(2, 'https://www.independent.co.uk/news/people/obituary-stanley-woods-1488284.html', 'Obituary: Stanley Woooods', '<amp-state id="digitalData"');    
@@ -31,7 +31,7 @@ export class SandboxComponent {
     this.checkResults[index] = result;      
 
     if(this.checkResults[index])
-      this.validWebsites++;
+      this.validWebsitesCount++;
 
     this.finalizeCheck();
     }, error => {
@@ -41,15 +41,15 @@ export class SandboxComponent {
   }
 
   finalizeCheck(){
-    this.checkedWebsites++;    
-    if (this.checkedWebsites == this.MAXWEBSITES){
+    this.checkedWebsitesCount++;    
+    if (this.checkedWebsitesCount == this.MAXWEBSITES){
       this.checkStatus = 'Check complete';
     }
   }
 
   allSitesOk(): boolean{
     //console.log('allSitesOk: ' + (this.validWebsites == this.MAXWEBSITES) + ' (' + this.validWebsites + '-' + this.MAXWEBSITES + ')')
-    return this.validWebsites == this.MAXWEBSITES;
+    return this.validWebsitesCount == this.MAXWEBSITES;
   }
 
   getImageSource(found:boolean):string{

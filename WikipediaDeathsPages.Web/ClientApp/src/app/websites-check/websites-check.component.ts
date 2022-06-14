@@ -34,8 +34,6 @@ export class WebsitesCheckComponent {
 
   checkWebsite(website:Website){            
     
-    console.log(encodeURIComponent(website.url));
-
     this.http.get<boolean>(this.baseUrl + 'reference/' + encodeURIComponent(website.url) + '/' + 
     website.firstSearchPhrase + '/' + website.secondSearchPhrase).subscribe(result => { 
     
@@ -73,7 +71,6 @@ export class WebsitesCheckComponent {
   }
 
   initializeWebsites(){
-
     this.websites = [ 
       { name: 'Encyclopædia Britannica Online (1)', 
         url: 'https://www.britannica.com/biography/Utpal-Dutt', 
@@ -124,14 +121,10 @@ export class WebsitesCheckComponent {
         firstSearchPhrase: 'Irvin, Eric', secondSearchPhrase: '1993-07-01', checkResult: false
       },
       { name: 'Bibliothèque nationale de France (1)', 
-        url: 'http://data.bnf.fr/ark:/12148/cb14122678c', 
-        firstSearchPhrase: 'Irving J. Moore ', secondSearchPhrase: '1993', checkResult: false
-      },
-      { name: 'Bibliothèque nationale de France (2)', 
-        url: 'https://data.bnf.fr/ark:/12148/cb13968003b', 
+        url: 'https://data.bnf.fr/fr/13968003/wilbert_prysock/',  // 'https://data.bnf.fr/ark:/12148/cb13968003b': returns 303 (redirect)
         firstSearchPhrase: 'Wilbert Prysock', secondSearchPhrase: '1993', checkResult: false
       },
-      { name: 'Bibliothèque nationale de France (3)', 
+      { name: 'Bibliothèque nationale de France (2)', 
         url: 'https://catalogue.bnf.fr/ark:/12148/cb15531676g', 
         firstSearchPhrase: 'Corona, Isabela', secondSearchPhrase: '1993', checkResult: false
       },            

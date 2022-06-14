@@ -6,14 +6,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Wikimedia.Utilities.Dtos;
+using Wikimedia.Utilities.ExtensionMethods;
 using Wikimedia.Utilities.Interfaces;
 using Wikimedia.Utilities.Models;
 using Wikimedia.Utilities.Services;
+using WikipediaDeathsPages.Data.Interfaces;
 using WikipediaDeathsPages.Service;
-using Wikimedia.Utilities.ExtensionMethods;
 using WikipediaDeathsPages.Service.Interfaces;
 using Xunit;
-using WikipediaDeathsPages.Data.Interfaces;
 
 namespace WikipediaDeathsPagesTests
 {
@@ -63,7 +63,7 @@ namespace WikipediaDeathsPagesTests
             webClientMock.Setup(_ => _.GetWikiTextArticle(itemDto.ArticleName, out s)).Returns("infobox{{ | Death_cause   = car crash  | .. | ..}} She was an American singer, actress and model. She was born..");
             webClientMock.Setup(_ => _.GetWikiTextArticle($"Deaths in {month} {deathDate.Year}", out s)).Returns(returnWikiTextMonthArticle);
 
-            var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceServiceMock.Object, 
+            var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceServiceMock.Object,
                                                         new WikiTextService(), toolforgeServiceMock.Object, webClientMock.Object, logger);
 
             var result = wikipediaService.GetDeathDateResult(deathDate, 48);

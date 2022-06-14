@@ -137,7 +137,7 @@ export class WebsitesCheckComponent {
         firstSearchPhrase: 'Abe Shires', secondSearchPhrase: '1993-07-23', checkResult: false
       },     
       { name: 'Basketball-Reference.com', 
-        url: 'https://www.basketball-reference.com/search/search.fcgi?search=Reggie Lewis',     // '+' -> ' '
+        url: 'https://www.basketball-reference.com/players/l/lewisre01.html',                   // no redirect!
         firstSearchPhrase: 'Reggie Lewis', secondSearchPhrase: '1993-07-27', checkResult: false
       }, 
       { name: 'Hockey-Reference.com', 

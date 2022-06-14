@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using HtmlAgilityPack;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -6,15 +7,13 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using WikipediaDeathsPages.Data.Interfaces;
 using Wikimedia.Utilities.ExtensionMethods;
+using Wikimedia.Utilities.Interfaces;
+using WikipediaDeathsPages.Data.Interfaces;
+using WikipediaDeathsPages.Service.Dtos;
 using WikipediaDeathsPages.Service.Helpers;
 using WikipediaDeathsPages.Service.Interfaces;
-using HtmlAgilityPack;
-using Newtonsoft.Json;
 using WikipediaDeathsPages.Service.Models;
-using WikipediaDeathsPages.Service.Dtos;
-using Wikimedia.Utilities.Interfaces;
 
 /*
 Loop eerst door de 'referenties'
@@ -149,7 +148,7 @@ namespace WikipediaDeathsPages.Service
                     return GetBasketballReference(articleLabel, deathDate);
                 case "Hockey":
                     return GetHockeyReference(articleLabel, deathDate);
-                case "Olympics": 
+                case "Olympics":
                     return GetOlympediaReference(articleLabel, deathDate);
                 case "Association football":
                     return GetAssociationFootballReference(articleLabel, deathDate);
@@ -267,7 +266,7 @@ namespace WikipediaDeathsPages.Service
                 return GenerateWebReference(articleLabel, url, "where2golf.com", DateTime.Today, DateTime.MinValue);
 
             return null;
-        }        
+        }
 
         private string GetAssociationFootballReference(string articleLabel, DateTime deathDate)
         {
@@ -294,12 +293,14 @@ namespace WikipediaDeathsPages.Service
             // https://www.hockey-reference.com/search/search.fcgi?search=Brian+Smith           Died: August 2, 1995
             var searchUrl = "https://www." + sportsSiteName + "/search/search.fcgi?search=" + articleLabel.Replace(" ", "+");
 
-            string response = DownloadString(searchUrl, true);  
+            string response = DownloadString(searchUrl, true);
 
             if (response.Contains("Found <strong>0 hits</strong> that match your search"))
                 return null;
 
-            // basketball-reference.com: no automatic redirect to players page in case of one match: player found via 'CheckMultiplePlayers'
+            // basketball-reference.com: not always (=sometimes) automatic redirect to players page in case of one match.
+            // That's why it is not tested (in unit test and ng Website check). Never mind; if not redirected than the
+            // player is found via 'heckMultiplePlayers(). This is also true for the other 3 sports I'm willing to bet.
             if (SportsPageContainsDateOfDeath(response, deathDate))
                 return GetSportsWebReference(articleLabel, searchUrl, sportsSiteName);
 
@@ -402,7 +403,7 @@ namespace WikipediaDeathsPages.Service
         }
 
         private IndependentDigitalData RetrieveIndependentData(string response)
-        {           
+        {
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(response);
 
@@ -581,7 +582,7 @@ namespace WikipediaDeathsPages.Service
                 if (item.StartsWith($@"reference URL: {urlStartsWith}"))
                 {
                     referenceUrl = item.Substring("reference URL: ".Length);
-                    
+
                     if (checkUrl) // not all sites return a 404 in case of NotFound. See corr. tests
                         if (DownloadString(referenceUrl, false) == null)
                             return false;
@@ -692,13 +693,13 @@ namespace WikipediaDeathsPages.Service
                         throw;
 
                     return null;
-                }                    
+                }
             }
-            catch 
+            catch
             {
                 if (throwException)
                     throw;
-                
+
                 return null;
             }
         }

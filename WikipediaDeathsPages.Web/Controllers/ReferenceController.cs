@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using Wikimedia.Utilities.Dtos;
-using WikipediaDeathsPages.Service.Dtos;
 using WikipediaDeathsPages.Service.Interfaces;
-using WikipediaDeathsPages.Service.Models;
 
 namespace WikipediaDeathsPages.Controllers
 {
@@ -13,12 +9,10 @@ namespace WikipediaDeathsPages.Controllers
     [Route("[controller]")]
     public class ReferenceController : ControllerBase
     {
-        private readonly ILogger<WikipediaController> logger;
         private readonly IReferenceService referenceService;
 
-        public ReferenceController(IReferenceService referenceService, ILogger<WikipediaController> logger)
+        public ReferenceController(IReferenceService referenceService)
         {
-            this.logger = logger;
             this.referenceService = referenceService;
         }
 

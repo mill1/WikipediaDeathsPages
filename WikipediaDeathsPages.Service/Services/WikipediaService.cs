@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using Wikimedia.Utilities.Dtos;
-using Wikimedia.Utilities.Interfaces;
-using WikipediaDeathsPages.Service.Dtos;
 using Wikimedia.Utilities.Exceptions;
 using Wikimedia.Utilities.ExtensionMethods;
+using Wikimedia.Utilities.Interfaces;
+using WikipediaDeathsPages.Service.Dtos;
 using WikipediaDeathsPages.Service.Interfaces;
 using WikipediaDeathsPages.Service.Models;
 
@@ -22,7 +21,7 @@ namespace WikipediaDeathsPages.Service
         private readonly IWikipediaWebClient wikipediaWebClient;
         private readonly ILogger<WikipediaService> logger;
 
-        public WikipediaService(IWikidataService wikidataService, IReferenceService referenceService, IWikiTextService wikiTextService, 
+        public WikipediaService(IWikidataService wikidataService, IReferenceService referenceService, IWikiTextService wikiTextService,
                                 IToolforgeService toolforgeService, IWikipediaWebClient wikipediaWebClient, ILogger<WikipediaService> logger)
         {
             this.wikidataService = wikidataService;
@@ -51,7 +50,7 @@ namespace WikipediaDeathsPages.Service
             try
             {
                 return wikidataService.GetSitelinksResult(article).SiteLinksCount;
-            }            
+            }
             catch (NullReferenceException)
             {
 
@@ -171,7 +170,7 @@ namespace WikipediaDeathsPages.Service
                 else
                 {
                     // If article name does not exist in wikidata its death date in WP differs OR the name it is a redirect.                    
-                    string redirectedArticleName;                    
+                    string redirectedArticleName;
                     string wikiText = wikipediaWebClient.GetWikiTextArticle(existingEntry.ArticleLinkedName, out redirectedArticleName);
 
                     if (redirectedArticleName == null)
@@ -212,7 +211,7 @@ namespace WikipediaDeathsPages.Service
                 resolveReference = true;
             else
                 if (existingEntry.Reference.Contains("sports-reference.com", StringComparison.OrdinalIgnoreCase))
-                    resolveReference = true;
+                resolveReference = true;
 
             if (resolveReference)
             {

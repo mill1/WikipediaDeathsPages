@@ -1,11 +1,10 @@
-﻿using Xunit;
-using WikipediaDeathsPages.Service;
-using Moq;
+﻿using Moq;
 using System;
-using WikipediaDeathsPages.Data.Interfaces;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
+using WikipediaDeathsPages.Data.Interfaces;
+using WikipediaDeathsPages.Service;
+using Xunit;
 
 namespace WikipediaDeathsPages.Tests
 {
@@ -165,8 +164,8 @@ namespace WikipediaDeathsPages.Tests
         [Theory(DisplayName = "Return null in case of non-existent url (in Wikidata)")]
         [InlineData("Encyclopædia Britannica (1)", "enwiki~!Encyclopædia Britannica Online~!Encyclopædia Britannica Online ID: biography/NOTFOUND")]
         [InlineData("Encyclopædia Britannica (2)", "enwiki~!reference URL: http://www.britannica.com/biography/NOTFOUND")]
-        [InlineData("Encyclopædia Britannica (3)","enwiki~!reference URL: https://www.britannica.com/biography/NOTFOUND")]
-        [InlineData("The Independent","enwiki~!reference URL: https://www.independent.co.uk/news/people/obituary-NOTFOUND.html")]
+        [InlineData("Encyclopædia Britannica (3)", "enwiki~!reference URL: https://www.britannica.com/biography/NOTFOUND")]
+        [InlineData("The Independent", "enwiki~!reference URL: https://www.independent.co.uk/news/people/obituary-NOTFOUND.html")]
         [InlineData("Spanish Biographical Dictionary (DB~e)", "Spanish Biographical Dictionary~!subject named as: Not Found~!Spanish Biographical Dictionary ID: NOTFOUND")]
         [InlineData("Biografisch Portaal", "Biografisch Portaal~!Biografisch Portaal van Nederland ID: NOTFOUND~!reference URL: http://www.biografischportaal.nl/persoon/NOTFOUND~!title: Not Found")]
         [InlineData("Filmportal", "enwiki~!filmportal.de~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Not Found~!Filmportal ID: NOTFOUND")]
@@ -225,7 +224,7 @@ namespace WikipediaDeathsPages.Tests
             "Basketball-Reference.com (single occurrence of name)",
             "Reggie Lewis",
             "1993-7-27",
-            "title=Reggie Lewis Stats - Basketball-Reference.com |url=https://www.basketball-reference.com/search/search.fcgi?search=Reggie+Lewis |website=basketball-reference.com"
+            "title=Reggie Lewis Stats - Basketball-Reference.com |url=https://www.basketball-reference.com/players/l/lewisre01.html |website=basketball-reference.com"    // At times the redirect works. At times not.
         )]
         [InlineData(
             "Basketball",
@@ -279,7 +278,7 @@ namespace WikipediaDeathsPages.Tests
         // Make sure that all requests to non-existent (sport) website url's result in a null value of the returned reference.
         // Even if the website returns status 200 (Ok) in case of a non-existent url we're good since (unlike most Wikdata ref sources) 
         // we check the response of (sport) websites for the date of death which will result in a null reference since it will not be found.
-        [Theory (DisplayName = "Return null in case of non-existent url (to sports website)")]
+        [Theory(DisplayName = "Return null in case of non-existent url (to sports website)")]
         [InlineData("Baseball", "Baseball-Reference.com")]
         [InlineData("American football", "Pro-Football-Reference.com")]
         [InlineData("Basketball", "Basketball-Reference.com")]

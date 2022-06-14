@@ -48,7 +48,7 @@ namespace WikipediaDeathsPages.Controllers
                     }
                 };
             }
-        }        
+        }
 
         [HttpGet("score/{article}")]
         public ArticleMetrics GetNotabilityScore(string article)

@@ -298,7 +298,9 @@ namespace WikipediaDeathsPages.Service
             if (response.Contains("Found <strong>0 hits</strong> that match your search"))
                 return null;
 
-            // basketball-reference.com: no automatic redirect to players page in case of one match: player found via 'CheckMultiplePlayers'
+            // basketball-reference.com: not always (=sometimes) automatic redirect to players page in case of one match.
+            // That's why it is not tested (in unit test and ng Website check). Never mind; if not redirected than the
+            // player is found via 'heckMultiplePlayers(). This is also true for the other 3 sports I'm willing to bet.
             if (SportsPageContainsDateOfDeath(response, deathDate))
                 return GetSportsWebReference(articleLabel, searchUrl, sportsSiteName);
 

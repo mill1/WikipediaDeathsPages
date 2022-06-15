@@ -411,9 +411,9 @@ namespace WikipediaDeathsPages.Service
         private bool ContainsRemovableEntry(List<WikipediaListItemDto> entries, out WikipediaListItemDto correctEntry)
         {
             // An entry is removable when
-            // 1. Invalid date of birth:           
-            // - multiple entries regarding the item exist (result of SPARQ query: multiple dates of birth)
-            // - one entry contains the correct DoB (wikidata DoB == WP DoB)
+            // 1. Invalid date of birth. Conditions:           
+            //    - multiple entries regarding the item exist (result of SPARQ query: multiple dates of birth)
+            //    - one entry contains the correct DoB (wikidata DoB == WP DoB)
             // In that case remove the other entry/entries containing the invalid date of birth.
             // In case no matching date is found in WP than don't do anything since something else is going on.
             correctEntry = null;

@@ -20,7 +20,7 @@ namespace WikipediaDeathsPages.Controllers
         public string GetReference(string article, DateTime deathDate)
         {
             // https://localhost:44304/reference/Bob%20Paisley/1996-2-14
-            // https://localhost:44304/reference/John%20Kramer%20(footballer)/1994-7-13
+            // https://localhost:44304/reference/John%20Kramer%20(footballer)/1994-7-13            
             return referenceService.Resolve(null, null, null, article, deathDate);
         }
 

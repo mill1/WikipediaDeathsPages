@@ -441,7 +441,6 @@ namespace WikipediaDeathsPages.Service
             return null;
         }
 
-        // TODO create button to check websites to have not been checked already: 
         private bool BritannicaUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // https://www.britannica.com/biography/S-J-Perelman
@@ -462,8 +461,16 @@ namespace WikipediaDeathsPages.Service
             if (ReferenceUrlFound("https://www.independent.co.uk/news/people/", referenceItems, true, ref referenceUrl))
                 return true;
 
+            // e.g. https://www.independent.co.uk/news/obituaries/obituary-berkely-mather-1305029.html
+            if (ReferenceUrlFound("https://www.independent.co.uk/news/obituaries/", referenceItems, true, ref referenceUrl))
+                return true;
+
             // e.g. https://www.independent.co.uk/incoming/obituary-harold-shepherdson-5649167.html
-            return ReferenceUrlFound("https://www.independent.co.uk/incoming/", referenceItems, true, ref referenceUrl);
+            if (ReferenceUrlFound("https://www.independent.co.uk/incoming/", referenceItems, true, ref referenceUrl))
+                return true;
+
+            // https://www.independent.co.uk/arts-entertainment/obituary-ronnie-boon-1169872.html
+            return ReferenceUrlFound("https://www.independent.co.uk/arts-entertainment/", referenceItems, true, ref referenceUrl);
         }
 
         private bool BiografischPortaalUrlFound(List<string> referenceItems, ref string referenceUrl)
@@ -685,7 +692,9 @@ namespace WikipediaDeathsPages.Service
             }
             catch (WebException e)
             {
-                if (((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.NotFound)
+                if (e.Response == null)
+                    return null;
+                else if (((HttpWebResponse)e.Response).StatusCode == HttpStatusCode.NotFound)
                     return null;
                 else
                 {

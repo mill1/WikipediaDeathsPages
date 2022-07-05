@@ -20,6 +20,7 @@ namespace WikipediaDeathsPages.Service
         private readonly IToolforgeService toolforgeService;
         private readonly IWikipediaWebClient wikipediaWebClient;
         private readonly ILogger<WikipediaService> logger;
+        private int minimumScore;
 
         public WikipediaService(IWikidataService wikidataService, IReferenceService referenceService, IWikiTextService wikiTextService,
                                 IToolforgeService toolforgeService, IWikipediaWebClient wikipediaWebClient, ILogger<WikipediaService> logger)
@@ -70,6 +71,7 @@ namespace WikipediaDeathsPages.Service
 
         public DeathDateResultDto GetDeathDateResult(DateTime deathDate, int minimumScore)
         {
+            this.minimumScore = minimumScore;
             var wikidataItems = wikidataService.GetItemsPerDeathDate(deathDate, false);
 
             if (minimumScore > 0)
@@ -133,7 +135,7 @@ namespace WikipediaDeathsPages.Service
                         throw new ArgumentException("Existing entry not found. Should not occur per definition");
 
                     age = string.Empty;
-                    description = existingEntry.Information.TruncLastPoint(); // including cod, if present                    
+                    description = existingEntry.Information.TruncLastPoint(); // including CoD, if present                    
                     reference = existingEntry.Reference;
 
                     if (wikiTextService.DescriptionContainsCauseOfDeath(description, causeOfDeath))
@@ -240,10 +242,7 @@ namespace WikipediaDeathsPages.Service
 
         private bool KeepExistingEntry(ExistingEntryDto existingEntry, out string reason)
         {
-
-#pragma warning disable S1135 // Track uses of "TODO" tags            
-            if (existingEntry.NotabilityScore >= 24)
-#pragma warning restore S1135 // Track uses of "TODO" tags
+            if (existingEntry.NotabilityScore >= minimumScore) 
             {
                 reason = "Notability";
                 return true;

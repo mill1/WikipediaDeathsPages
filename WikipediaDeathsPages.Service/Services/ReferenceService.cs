@@ -520,7 +520,7 @@ namespace WikipediaDeathsPages.Service
         private bool LoCUrlFound(List<string> referenceItems, ref string referenceUrl)
         {
             // e.g. https://id.loc.gov/authorities/names/n84163016.html
-            return ReferenceUrlIdFound("Library of Congress authority ID: ", @"https://id.loc.gov/authorities/names/", referenceItems, true, ref referenceUrl);
+            return ReferenceUrlIdFound("Library of Congress authority ID: ", @"https://id.loc.gov/authorities/names/", referenceItems, false, ref referenceUrl);
         }
 
         private bool SnacUrlFound(List<string> referenceItems, ref string referenceUrl)

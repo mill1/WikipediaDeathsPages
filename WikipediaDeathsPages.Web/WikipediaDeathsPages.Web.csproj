@@ -10,7 +10,7 @@
 
     <!-- Set this to true if you enable server-side prerendering -->
     <BuildServerSideRenderer>false</BuildServerSideRenderer>
-    <AssemblyVersion>1.0.1.8</AssemblyVersion>
+    <AssemblyVersion>1.0.1.9</AssemblyVersion>
     <FileVersion>1.0.0.1</FileVersion>
   </PropertyGroup>
 

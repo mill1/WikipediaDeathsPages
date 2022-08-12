@@ -111,6 +111,8 @@ namespace WikipediaDeathsPages.Service
             // enrich the existing items
             EnrichExistingEntries(existingEntries, entries, deathDate);
 
+            // TODO
+
             // For each of the entries try to find the corresponding existing entry and determine whether to keep it. Sorting issue prevented!
             entries.ForEach(e => EvaluateExistingEntries(e, existingEntries));
         }
@@ -251,13 +253,21 @@ namespace WikipediaDeathsPages.Service
             {
                 if (existingEntry.Reference == null)
                 {
-                    reason = "Poor notability and no ref.";
+                    reason = "Poor notability and no reference.";
                     return false;
                 }
                 else
                 {
-                    reason = "Poor notability but has ref.";
-                    return true;
+                    if (existingEntry.NotabilityScore * 2 < minimumScore)
+                    {
+                        reason = "Notability too poor in spite of reference.";
+                        return false;
+                    }
+                    else
+                    {
+                        reason = "Poor notability but has reference.";
+                        return true;
+                    }
                 }
             }
         }

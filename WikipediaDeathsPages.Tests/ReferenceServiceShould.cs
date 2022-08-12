@@ -168,8 +168,7 @@ namespace WikipediaDeathsPages.Tests
         [InlineData("The Independent", "enwiki~!reference URL: https://www.independent.co.uk/news/people/obituary-NOTFOUND.html")]
         [InlineData("Spanish Biographical Dictionary (DB~e)", "Spanish Biographical Dictionary~!subject named as: Not Found~!Spanish Biographical Dictionary ID: NOTFOUND")]
         [InlineData("Biografisch Portaal", "Biografisch Portaal~!Biografisch Portaal van Nederland ID: NOTFOUND~!reference URL: http://www.biografischportaal.nl/persoon/NOTFOUND~!title: Not Found")]
-        [InlineData("Filmportal", "enwiki~!filmportal.de~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Not Found~!Filmportal ID: NOTFOUND")]
-        [InlineData("Library of Congress (LoC)", "enwiki~!Library of Congress authority ID: NOTFOUND~!Library of Congress Authorities~!retrieved: 2019-12-16T00:00:00Z")]
+        [InlineData("Filmportal", "enwiki~!filmportal.de~!retrieved: 2017-10-09T00:00:00Z~!subject named as: Not Found~!Filmportal ID: NOTFOUND")]        
         public void ReturnNullIfWikidataUrlNotFound(string source, string dateOfDeathRefs)
         {
             Debug.WriteLine($"##### Testing source {source}...");

@@ -14,6 +14,7 @@ import { DeathDayComponent } from './death-day/death-day.component';
 import { NgbdSortableHeader } from './wikidata-details/wikidata-details.component';
 import { WikidataDetailsComponent } from './wikidata-details/wikidata-details.component';
 import { WebsitesCheckComponent } from './websites-check/websites-check.component';
+import { ArticlesCheckComponent } from './articles-check/articles-check.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { WebsitesCheckComponent } from './websites-check/websites-check.componen
     NgbdSortableHeader,
     WikidataDetailsComponent,
     WebsitesCheckComponent,
+    ArticlesCheckComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

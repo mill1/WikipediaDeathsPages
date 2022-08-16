@@ -1,0 +1,20 @@
+<button type="button" class="btn btn-primary buttonwidth15percent" (click)="onFetch()" [disabled]="isBusy">Perform article checks</button>
+<div *ngIf="!allArticlesOk(); else elseBlock">
+    <table class="table table-sm"> <!-- bootstrap class table-striped niet gebruiken: overwrites [ngClass] -->
+        <thead class="thead-dark">
+        <tr>      
+          <td colspan="3" style="background-color:white;"><h6>{{checkStatus}}</h6></td>   
+        </tr> 
+        <tr>    
+          <th style="width: 50%;">article</th>          
+          <th style="width: 50%;">anomalie</th>
+        </tr>  
+      </thead>
+      <tbody>  
+        <tr>
+          <td>Article linked name + href</td><td>anomalie description</td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+<ng-template #elseBlock><div></div></ng-template>

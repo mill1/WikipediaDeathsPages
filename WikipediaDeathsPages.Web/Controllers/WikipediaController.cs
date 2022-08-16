@@ -57,7 +57,7 @@ namespace WikipediaDeathsPages.Controllers
 
             try
             {
-                return wikipediaService.GetTmp(year, monthId);
+                return wikipediaService.ResolveArticleAnomalies(year, monthId);
             }
             catch (Exception e)
             {

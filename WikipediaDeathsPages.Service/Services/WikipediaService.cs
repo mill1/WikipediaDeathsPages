@@ -106,7 +106,7 @@ namespace WikipediaDeathsPages.Service
             };
         }
 
-        public IEnumerable<ExistingEntryDto> GetTmp(int year, int month)
+        public IEnumerable<ExistingEntryDto> ResolveArticleAnomalies(int year, int month)
         {
             var existingEntries = new List<ExistingEntryDto>();            
             string wikiText = GetWikiText(new DateTime(year, month, 1));

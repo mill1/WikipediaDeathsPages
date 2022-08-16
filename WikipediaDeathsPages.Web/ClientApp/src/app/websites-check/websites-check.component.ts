@@ -1,5 +1,5 @@
-import { Component, OnInit, Inject, } from '@angular/core';
-import { HttpClient, } from '@angular/common/http';
+import { Component, Inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Website } from '../model/Website';
 
 @Component({

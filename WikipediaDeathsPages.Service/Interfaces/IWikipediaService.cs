@@ -10,5 +10,6 @@ namespace WikipediaDeathsPages.Service.Interfaces
         IEnumerable<ArticleMetrics> GetArticleMetrics(IEnumerable<string> articles);
         ArticleMetrics GetArticleMetrics(string article);
         DeathDateResultDto GetDeathDateResult(DateTime deathDate, int minimumScore);
+        IEnumerable<ExistingEntryDto> GetTmp(int year, int month);
     }
 }

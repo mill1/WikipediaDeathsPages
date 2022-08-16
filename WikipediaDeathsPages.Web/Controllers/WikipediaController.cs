@@ -50,6 +50,31 @@ namespace WikipediaDeathsPages.Controllers
             }
         }
 
+        [HttpGet("existingentriesperday/{year}/{monthId}")]
+        public IEnumerable<ExistingEntryDto> GetDeathsCountPerDay(int year, int monthId)
+        {
+            // https://localhost:44304/wikipedia/existingentriesperday/1999/3
+
+            try
+            {
+                return wikipediaService.GetTmp(year, monthId);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e.Message, e);
+
+                return new List<ExistingEntryDto>
+                {
+                    new ExistingEntryDto
+                    {
+                        ArticleName = "Error",
+                        ArticleLinkedName = $"Type: {e.GetType().Name}",
+                        Information = e.Message
+                    }
+                };
+            }
+        }
+
         [HttpGet("score/{article}")]
         public ArticleMetrics GetNotabilityScore(string article)
         {

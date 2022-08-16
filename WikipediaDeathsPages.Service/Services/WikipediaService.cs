@@ -80,7 +80,7 @@ namespace WikipediaDeathsPages.Service
             List<WikipediaListItemDto> entries = InitializeEntries(wikidataItems);
 
             // Get the existing entries in the wp month list. Do that now before the wikidata entries are limited
-            var existingEntries = GetExistingEntries(deathDate)?.ToList();
+            var existingEntries = GetExistingEntries(GetWikiText(deathDate), deathDate, true).ToList();
 
             if (existingEntries.Any())
                 HandleExistingEntries(deathDate, entries, existingEntries);
@@ -104,6 +104,19 @@ namespace WikipediaDeathsPages.Service
                 ScoreNumberFour = ResolveScoreNumberFour(entries),
                 RejectedExistingEntries = existingEntries?.Where(ee => !ee.Keep),
             };
+        }
+
+        public IEnumerable<ExistingEntryDto> GetTmp(int year, int month)
+        {
+            var existingEntries = new List<ExistingEntryDto>();            
+            string wikiText = GetWikiText(new DateTime(year, month, 1));
+
+            for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
+            {
+                var entriesPerDay = GetExistingEntries(wikiText, new DateTime(year, month, day), false);
+                existingEntries.AddRange(entriesPerDay);
+            }
+            return existingEntries;
         }
 
         private void HandleExistingEntries(DateTime deathDate, List<WikipediaListItemDto> entries, List<ExistingEntryDto> existingEntries)
@@ -311,27 +324,53 @@ namespace WikipediaDeathsPages.Service
             return Description1.Contains(Description2, StringComparison.OrdinalIgnoreCase);
         }
 
-        private IEnumerable<ExistingEntryDto> GetExistingEntries(DateTime deathDate)
+        //private IEnumerable<ExistingEntryDto> GetExistingEntries(DateTime deathDate)
+        //{
+        //    try
+        //    {
+        //        string text = wikiTextService.GetWikiTextDeathsPerMonth(deathDate, false);
+
+        //        if (text == null) // no entries regarding that DoD
+        //            return new List<ExistingEntryDto>();
+
+        //        text = wikiTextService.GetDaySectionOfMonthList(text, deathDate.Day);
+
+        //        IEnumerable<string> deceasedText = wikiTextService.GetDeceasedTextAsList(text);
+        //        IEnumerable<ExistingEntryDto> deceased = deceasedText.Select(e => ParseEntry(e, deathDate));
+
+        //        return deceased;
+        //    }
+        //    catch (WikipediaPageNotFoundException)
+        //    {
+        //        // Deaths per month article does not exist (yet)
+        //        return new List<ExistingEntryDto>();
+        //    }
+        //}
+
+        private string GetWikiText(DateTime deathDate)
         {
             try
             {
-                string text = wikiTextService.GetWikiTextDeathsPerMonth(deathDate, false);
-
-                if (text == null) // no entries regarding that DoD
-                    return new List<ExistingEntryDto>();
-
-                text = wikiTextService.GetDaySectionOfMonthList(text, deathDate.Day);
-
-                IEnumerable<string> deceasedText = wikiTextService.GetDeceasedTextAsList(text);
-                IEnumerable<ExistingEntryDto> deceased = deceasedText.Select(e => ParseEntry(e, deathDate));
-
-                return deceased;
+                return wikiTextService.GetWikiTextDeathsPerMonth(deathDate, false);
             }
             catch (WikipediaPageNotFoundException)
             {
                 // Deaths per month article does not exist (yet)
-                return new List<ExistingEntryDto>();
+                return null;
             }
+        }
+
+        private IEnumerable<ExistingEntryDto> GetExistingEntries(string wikiText, DateTime deathDate, bool checkRedirect)
+        {
+            if (wikiText == null)
+                return new List<ExistingEntryDto>();
+
+            wikiText = wikiTextService.GetDaySectionOfMonthList(wikiText, deathDate.Day);
+
+            IEnumerable<string> deceasedText = wikiTextService.GetDeceasedTextAsList(wikiText);
+            IEnumerable<ExistingEntryDto> deceased = deceasedText.Select(e => ParseEntry(e, deathDate, checkRedirect));
+
+            return deceased;
         }
 
         private void EvaluateExistingEntries(WikipediaListItemDto entry, List<ExistingEntryDto> existingEntries)
@@ -346,9 +385,9 @@ namespace WikipediaDeathsPages.Service
             entry.KeepExisting = KeepExistingEntry(existingEntry, out _);
         }
 
-        private ExistingEntryDto ParseEntry(string entryText, DateTime deathDate)
+        private ExistingEntryDto ParseEntry(string entryText, DateTime deathDate, bool checkRedirect)
         {
-            var linkedName = wikiTextService.GetNameFromEntryText(entryText, true);
+            var linkedName = GetLinkedNameFromEntryText(entryText, checkRedirect);
 
             return new ExistingEntryDto
             {
@@ -360,6 +399,20 @@ namespace WikipediaDeathsPages.Service
                 Information = wikiTextService.GetInformationFromEntryText(entryText),
                 Reference = wikiTextService.GetReferencesFromEntryText(entryText),
             };
+        }
+
+        public string GetLinkedNameFromEntryText(string entryText, bool checkRedirect)
+        {
+            if (checkRedirect)
+            {
+                return wikiTextService.GetNameFromEntryText(entryText, true);
+            }
+            else
+            { 
+                string text = entryText.Substring("[[".Length, entryText.IndexOf("]]") - "]]".Length);
+                int pos = text.IndexOf('|');
+                return (pos < 0) ? text : text.Substring(0, pos);
+            }
         }
 
         private string ResolveUri(string articleName)

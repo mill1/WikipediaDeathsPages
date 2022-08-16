@@ -113,18 +113,52 @@ namespace WikipediaDeathsPages.Service
 
             for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
             {
-                var entriesPerDay = GetExistingEntries(wikiText, new DateTime(year, month, day), false);
-                existingEntries.AddRange(entriesPerDay);
+                DateTime deathDate = new DateTime(year, month, day);
+                var entriesPerDay = GetExistingEntries(wikiText, deathDate, false);
+
+                foreach (var entry in entriesPerDay)
+                {
+                    TmpDod(entry);
+                }
+
+                existingEntries.AddRange(entriesPerDay); // TODO lw
             }
             return existingEntries;
+        }
+
+        private void TmpDod(ExistingEntryDto entry)
+        {
+            try
+            {
+                string wikiText = wikipediaWebClient.GetWikiTextArticle(entry.ArticleLinkedName, out string redirectedArticle);
+
+                if (redirectedArticle != null)
+                    throw new WikipediaPageNotFoundException($"Article name '{entry.ArticleLinkedName}' results in a redirect to '{redirectedArticle}'! Investigate.");
+               
+                var dateOfDeath = wikiTextService.ResolveDate(wikiText, entry.DateOfDeath);
+
+                if (dateOfDeath == DateTime.MinValue)
+                {
+                    Console.WriteLine(entry.ArticleName);
+                }
+                // TODO: check categories too?
+
+            }
+            catch (Exception e)
+            {
+                logger.LogInformation(e.Message, e);
+
+                // TODO ??
+                string message = "error: " + entry.ArticleLinkedName + " [WikipediaService.TmpDod]: " + e.Message + (e.InnerException == null ? string.Empty : "\r\nInner Exception: " + e.InnerException);
+                entry.WikiText = message;
+                entry.NotabilityScore = 1000;                
+            }
         }
 
         private void HandleExistingEntries(DateTime deathDate, List<WikipediaListItemDto> entries, List<ExistingEntryDto> existingEntries)
         {
             // enrich the existing items
             EnrichExistingEntries(existingEntries, entries, deathDate);
-
-            // TODO
 
             // For each of the entries try to find the corresponding existing entry and determine whether to keep it. Sorting issue prevented!
             entries.ForEach(e => EvaluateExistingEntries(e, existingEntries));

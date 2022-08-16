@@ -53,7 +53,7 @@ namespace WikipediaDeathsPages.Controllers
         [HttpGet("existingentriesperday/{year}/{monthId}")]
         public IEnumerable<ExistingEntryDto> GetDeathsCountPerDay(int year, int monthId)
         {
-            // https://localhost:44304/wikipedia/existingentriesperday/1999/3
+            // https://localhost:44304/wikipedia/existingentriesperday/1999/4
 
             try
             {
@@ -68,7 +68,7 @@ namespace WikipediaDeathsPages.Controllers
                     new ExistingEntryDto
                     {
                         ArticleName = "Error",
-                        ArticleLinkedName = $"Type: {e.GetType().Name}",
+                        ArticleLinkedName = $"Exception: {e.GetType().Name}",
                         Information = e.Message
                     }
                 };

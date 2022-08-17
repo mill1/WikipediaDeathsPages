@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Wikimedia.Utilities.Dtos;
 using Wikimedia.Utilities.Exceptions;
@@ -135,14 +136,17 @@ namespace WikipediaDeathsPages.Service
             // Check 1: Redirect?
             if (redirectedArticle != null)
             {
-                AddAnomalieText(ref anomalies, entry, $"'{entry.ArticleLinkedName}' results in a redirect to '{redirectedArticle}'. Investigate.");
+                AddAnomalieText(ref anomalies, entry, $"'{entry.ArticleLinkedName}' results in a redirect to '{redirectedArticle}'. Investigate");
                 return anomalies; // no need to investigate wiki text '#REDIRECT [[...'
             }
                 
             var dateOfDeath = wikiTextService.ResolveDate(wikiText, entry.DateOfDeath);
 
             if (dateOfDeath == DateTime.MinValue)
-                AddAnomalieText(ref anomalies, entry, $"Death date {entry.DateOfDeath.ToString("d MMM yyyy")} not encountered in article.");
+            {
+                var deathDateText = entry.DateOfDeath.ToString("d MMMM yyyy", CultureInfo.GetCultureInfo("en-US"));
+                AddAnomalieText(ref anomalies, entry, $"Death date {deathDateText} not encountered in article");
+            }                
             
             var searchTerm1 = GetCategorieSearchTerm(entry.DateOfDeath.Year, "deaths");
             var searchTerm2 = GetCategorieSearchTerm(entry.DateOfDeath.Year, "suicides");
@@ -150,7 +154,7 @@ namespace WikipediaDeathsPages.Service
             var comparisonType = StringComparison.OrdinalIgnoreCase;
 
             if (!(wikiText.Contains(searchTerm1, comparisonType) || wikiText.Contains(searchTerm2, comparisonType)))
-                AddAnomalieText(ref anomalies, entry, $"Categorie '{searchTerm1}' not encountered in article.");
+                AddAnomalieText(ref anomalies, entry, $"Categorie '{searchTerm1}' not encountered in article");
 
             return anomalies;
         }

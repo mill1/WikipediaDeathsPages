@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Xml.Linq;
 using Wikimedia.Utilities.Dtos;
 using Wikimedia.Utilities.ExtensionMethods;
 using Wikimedia.Utilities.Interfaces;
@@ -69,6 +70,80 @@ namespace WikipediaDeathsPagesTests
             var result = wikipediaService.GetDeathDateResult(deathDate, 48);
 
             Assert.Equal("*[[Aaliyah]], 22, American singer, actress and model, aviation accident.", result.Entries.First().WikiText);
+        }
+
+        [Fact(DisplayName ="Resolve the date of death anomalie")]
+        public void ResolveDeathDateAnomalie()
+        {
+            var deathDate = new DateTime(1999, 4, 1);
+            var wikiTextServiceMock = new Mock<IWikiTextService>();
+
+            string s;
+            var dummyWikiText = "boeit niet";
+            var articleLinkedName = "Linked Name";
+            var category = $"[[Category:{deathDate.Year} deaths]]"; 
+            var articleText = $"{articleLinkedName} (1900 &ndash; {deathDate.Year}) was a Dutch athlete. {category}";
+
+            wikiTextServiceMock.Setup(_ => _.GetWikiTextDeathsPerMonth(deathDate, false, null)).Returns(dummyWikiText);
+            wikiTextServiceMock.Setup(_ => _.GetDaySectionOfMonthList(dummyWikiText, 1)).Returns(dummyWikiText);
+            wikiTextServiceMock.Setup(_ => _.GetDeceasedTextAsList(dummyWikiText)).Returns(new string[] { $"[[{articleLinkedName}|Name]], 99, description, cause of death." });
+            wikiTextServiceMock.Setup(_ => _.ResolveDate(articleText, deathDate)).Returns(DateTime.MinValue);
+            webClientMock.Setup(_ => _.GetWikiTextArticle(articleLinkedName, out s)).Returns(articleText);
+
+            var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceServiceMock.Object,
+            wikiTextServiceMock.Object, toolforgeServiceMock.Object, webClientMock.Object, logger);
+
+            var anomalies = wikipediaService.ResolveArticleAnomalies(deathDate.Year, deathDate.Month);
+            Assert.Equal("Death date 1 April 1999 not encountered in article", anomalies.First().Text);
+        }
+
+        [Fact(DisplayName = "Resolve the category anomalie")]
+        public void ResolveCategorieAnomalie()
+        {
+            var deathDate = new DateTime(1999, 4, 1);
+            var wikiTextServiceMock = new Mock<IWikiTextService>();
+
+            string s;
+            var dummyWikiText = "boeit niet";
+            var articleLinkedName = "Linked Name";
+            var deathDateText = deathDate.ToString("d MMMM yyyy", CultureInfo.GetCultureInfo("en-US")); // not necessary for test btw
+            var articleText = $"{articleLinkedName} (1 January 1900 &ndash; {deathDateText}) was a Dutch athlete.";
+
+            wikiTextServiceMock.Setup(_ => _.GetWikiTextDeathsPerMonth(deathDate, false, null)).Returns(dummyWikiText);
+            wikiTextServiceMock.Setup(_ => _.GetDaySectionOfMonthList(dummyWikiText, 1)).Returns(dummyWikiText);
+            wikiTextServiceMock.Setup(_ => _.GetDeceasedTextAsList(dummyWikiText)).Returns(new string[] { $"[[{articleLinkedName}|Name]], 99, description, cause of death." });
+            wikiTextServiceMock.Setup(_ => _.ResolveDate(articleText, deathDate)).Returns(deathDate);
+            webClientMock.Setup(_ => _.GetWikiTextArticle(articleLinkedName, out s)).Returns(articleText);
+
+            var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceServiceMock.Object,
+            wikiTextServiceMock.Object, toolforgeServiceMock.Object, webClientMock.Object, logger);
+
+            var anomalies = wikipediaService.ResolveArticleAnomalies(deathDate.Year, deathDate.Month);
+            Assert.Equal("Categorie '[[Category:1999 deaths' not encountered in article", anomalies.First().Text);
+        }
+
+        [Fact(DisplayName = "Resolve multiple anomalies")]
+        public void ResolveMultipleAnomalies()
+        {
+            var deathDate = new DateTime(1999, 4, 1);
+            var wikiTextServiceMock = new Mock<IWikiTextService>();
+
+            string s;
+            var dummyWikiText = "boeit niet";
+            var articleLinkedName = "Linked Name";
+            var articleText = $"{articleLinkedName} (1900 &ndash; {deathDate.Year}) was a Dutch athlete.";
+
+            wikiTextServiceMock.Setup(_ => _.GetWikiTextDeathsPerMonth(deathDate, false, null)).Returns(dummyWikiText);
+            wikiTextServiceMock.Setup(_ => _.GetDaySectionOfMonthList(dummyWikiText, 1)).Returns(dummyWikiText);
+            wikiTextServiceMock.Setup(_ => _.GetDeceasedTextAsList(dummyWikiText)).Returns(new string[] { $"[[{articleLinkedName}|Name]], 99, description, cause of death." });
+            wikiTextServiceMock.Setup(_ => _.ResolveDate(articleText, deathDate)).Returns(DateTime.MinValue);
+            webClientMock.Setup(_ => _.GetWikiTextArticle(articleLinkedName, out s)).Returns(articleText);
+
+            var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceServiceMock.Object,
+            wikiTextServiceMock.Object, toolforgeServiceMock.Object, webClientMock.Object, logger);
+
+            var anomalies = wikipediaService.ResolveArticleAnomalies(deathDate.Year, deathDate.Month);
+            Assert.Equal("Death date 1 April 1999 not encountered in article, Categorie '[[Category:1999 deaths' not encountered in article", anomalies.First().Text);
         }
 
         [Fact(DisplayName = "Resolve Olympic reference")]

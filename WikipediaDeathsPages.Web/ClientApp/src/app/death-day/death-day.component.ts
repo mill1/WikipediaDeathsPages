@@ -47,6 +47,10 @@ export class DeathDayComponent {
   return this.scoreNumberFour;
  }
 
+ public getCheckedMonth(){
+  return this.bsValue.getFullYear() + '/' + (this.bsValue.getMonth()+1);
+ }
+
  public applyWarningStyle(index:number):boolean{
   return !this.entries[index].keepExisting && (this.entries[index].wikidataItem.dateOfDeath !== this.entries[index].wikipediaArticle.dateOfDeath);
  }

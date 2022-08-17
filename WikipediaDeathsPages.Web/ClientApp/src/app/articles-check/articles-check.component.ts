@@ -12,17 +12,17 @@ export class ArticlesCheckComponent {
   anomalies: ArticleAnomalieResultDto[];
   checkStatus: string;
   isBusy = false;
-  @Input() deathDate: Date;
+  //@Input() deathDate = new Date("1900-1-1");
+  @Input() checkedMonth='';
 
-  constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {     
+  constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) {         
   }
 
   onFetch(){    
-    this.isBusy = true;
-    let checkedMonth = this.deathDate.getFullYear() + '/' + (this.deathDate.getMonth()+1);
-    this.checkStatus = 'Checking the corresponding articles for anomalies for month '+checkedMonth+', please hold on... ';
+    this.isBusy = true;    
+    this.checkStatus = 'Checking the corresponding articles for anomalies regarding month '+this.checkedMonth+'...  ';
 
-    let url = this.baseUrl + 'wikipedia/articleanomalies/'+checkedMonth;
+    let url = this.baseUrl + 'wikipedia/articleanomalies/'+this.checkedMonth;
     console.log('url: ' + url);
     this.http.get<ArticleAnomalieResultDto[]>(url).subscribe(result => {   
       
@@ -46,7 +46,7 @@ export class ArticlesCheckComponent {
         return "../../assets/ok.png";
       }
       else{
-        return "../../assets/nok.png";
+        return "../../assets/nok2.png";
       }
     }
   }

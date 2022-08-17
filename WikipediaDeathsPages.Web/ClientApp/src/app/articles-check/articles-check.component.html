@@ -1,10 +1,10 @@
-<button type="button" class="btn btn-primary buttonwidth200px" (click)="onFetch()" [disabled]="isBusy">Perform article checks</button>
+<button type="button" class="btn btn-primary buttonwidth300px" (click)="onFetch()" [disabled]="isBusy">Perform article checks for {{checkedMonth}}</button>
 
 <div *ngIf="!allArticlesOk(); else elseBlock">
     <table class="table table-sm"> <!-- bootstrap class table-striped niet gebruiken: overwrites [ngClass] -->
         <thead class="thead-dark">
         <tr>      
-          <td colspan="3" style="background-color:white;"><i>{{checkStatus}}</i> <img src="{{getImageSource()}}" style="max-height: 20px"></td>   
+          <td colspan="3" style="background-color:white;"><i>{{checkStatus}}</i> <img src="{{getImageSource()}}" style="max-height: 30px"></td>   
         </tr> 
         <tr>
           <th style="width: 5%;">Day</th>

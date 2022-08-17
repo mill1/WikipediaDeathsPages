@@ -37,6 +37,6 @@ a.menu_links {
   font-family: comiclocal;
   src: url(assets/font/COMIC.TTF);
 }
-.buttonwidth15percent {
-  width: 15%;
+.buttonwidth200px {
+  width: 200px;
 }

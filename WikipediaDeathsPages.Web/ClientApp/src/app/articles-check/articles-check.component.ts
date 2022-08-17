@@ -36,7 +36,7 @@ export class ArticlesCheckComponent {
 
   allArticlesOk(): boolean{    
     console.log(this.entries)
-    return !this.isBusy && (this.entries === undefined || this.entries.length === 3);
+    return !this.isBusy && (this.entries === undefined || this.entries.length === 2);
   }
 
 }

@@ -1,4 +1,4 @@
-<button type="button" class="btn btn-primary buttonwidth15percent" (click)="onFetch()" [disabled]="isBusy">Perform article checks</button>
+<button type="button" class="btn btn-primary buttonwidth200px" (click)="onFetch()" [disabled]="isBusy">Perform article checks</button>
 <div *ngIf="!allArticlesOk(); else elseBlock">
     <table class="table table-sm"> <!-- bootstrap class table-striped niet gebruiken: overwrites [ngClass] -->
         <thead class="thead-dark">
@@ -6,13 +6,14 @@
           <td colspan="3" style="background-color:white;"><h6>{{checkStatus}}</h6></td>   
         </tr> 
         <tr>    
-          <th style="width: 50%;">article</th>          
-          <th style="width: 50%;">anomalie</th>
+          <th style="width: 25%;">Article name</th>          
+          <th style="width: 75%;">Anomalie(s)</th>
         </tr>  
       </thead>
       <tbody>  
-        <tr>
-          <td>Article linked name + href</td><td>anomalie description</td>
+        <tr *ngFor="let entry of entries">
+          <td><a href="{{ entry.wikipediaArticle.uri }}" target="_blank">{{ entry.wikipediaArticle.name }}</a></td>
+          <td>[anomalie(s) description]</td>
         </tr>
       </tbody>
     </table>

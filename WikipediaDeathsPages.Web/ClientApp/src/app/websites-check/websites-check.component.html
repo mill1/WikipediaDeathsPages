@@ -1,4 +1,4 @@
-<button type="button" class="btn btn-primary buttonwidth15percent" (click)="checkWebsites()" [disabled]="checkedWebsitesCount !== websites.length">Check reference sites</button>
+<button type="button" class="btn btn-primary buttonwidth200px" (click)="checkWebsites()" [disabled]="checkedWebsitesCount !== websites.length">Check reference sites</button>
 <div *ngIf="!allSitesOk(); else elseBlock">
     <table class="table table-sm"> <!-- bootstrap class table-striped niet gebruiken: overwrites [ngClass] -->
         <thead class="thead-dark">
@@ -6,9 +6,9 @@
           <td colspan="3" style="background-color:white;"><h6>{{checkStatus}}</h6></td>   
         </tr> 
         <tr>    
-          <th style="width: 40%;">website</th>
+          <th style="width: 40%;">Website</th>
           <th style="width: 10%;">&nbsp;</th>
-          <th style="width: 50%;">result</th>
+          <th style="width: 50%;">Result</th>
         </tr>  
       </thead>
       <tbody>  

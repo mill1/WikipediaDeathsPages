@@ -50,10 +50,10 @@ namespace WikipediaDeathsPages.Controllers
             }
         }
 
-        [HttpGet("existingentriesperday/{year}/{monthId}")]
-        public IEnumerable<ExistingEntryDto> GetDeathsCountPerDay(int year, int monthId)
+        [HttpGet("articleanomalies/{year}/{monthId}")]
+        public IEnumerable<ArticleAnomalieDto> GetArticleAnomalies(int year, int monthId)
         {
-            // https://localhost:44304/wikipedia/existingentriesperday/1999/4
+            // https://localhost:44304/wikipedia/articleanomalies/1999/4
 
             try
             {
@@ -62,14 +62,15 @@ namespace WikipediaDeathsPages.Controllers
             catch (Exception e)
             {
                 logger.LogError(e.Message, e);
+                var exceptionName = e.GetType().Name;
 
-                return new List<ExistingEntryDto>
+                return new List<ArticleAnomalieDto>
                 {
-                    new ExistingEntryDto
+                    new ArticleAnomalieDto
                     {
-                        ArticleName = "Error",
-                        ArticleLinkedName = $"Exception: {e.GetType().Name}",
-                        Information = e.Message
+                        ArticleLinkedName = $"Error: {exceptionName}",
+                        Uri = $"https://www.google.com/search?q=site%3Astackoverflow.com+{exceptionName}",
+                        Text = e.Message
                     }
                 };
             }

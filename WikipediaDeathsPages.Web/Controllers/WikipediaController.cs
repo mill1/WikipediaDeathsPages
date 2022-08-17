@@ -51,7 +51,7 @@ namespace WikipediaDeathsPages.Controllers
         }
 
         [HttpGet("articleanomalies/{year}/{monthId}")]
-        public IEnumerable<ArticleAnomalieDto> GetArticleAnomalies(int year, int monthId)
+        public IEnumerable<ArticleAnomalieResultDto> GetArticleAnomalies(int year, int monthId)
         {
             // https://localhost:44304/wikipedia/articleanomalies/1999/4
 
@@ -64,9 +64,9 @@ namespace WikipediaDeathsPages.Controllers
                 logger.LogError(e.Message, e);
                 var exceptionName = e.GetType().Name;
 
-                return new List<ArticleAnomalieDto>
+                return new List<ArticleAnomalieResultDto>
                 {
-                    new ArticleAnomalieDto
+                    new ArticleAnomalieResultDto
                     {
                         ArticleLinkedName = $"Error: {exceptionName}",
                         Uri = $"https://www.google.com/search?q=site%3Astackoverflow.com+{exceptionName}",

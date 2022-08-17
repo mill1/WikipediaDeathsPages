@@ -56,8 +56,7 @@ export class WebsitesCheckComponent {
     }
   }
 
-  allSitesOk(): boolean{
-    //console.log('allSitesOk: ' + (this.validWebsitesCount == this.websites.length) + ' (' + this.validWebsitesCount + '-' + this.websites.length + ')')
+  allSitesOk(): boolean{    
     return this.validWebsitesCount == this.websites.length;
   }
 

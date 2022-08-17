@@ -107,9 +107,9 @@ namespace WikipediaDeathsPages.Service
             };
         }
 
-        public IEnumerable<ArticleAnomalieDto> ResolveArticleAnomalies(int year, int month)
+        public IEnumerable<ArticleAnomalieResultDto> ResolveArticleAnomalies(int year, int month)
         {
-            var anomaliesPerMonth = new List<ArticleAnomalieDto>();            
+            var anomaliesPerMonth = new List<ArticleAnomalieResultDto>();            
             string wikiText = GetWikiText(new DateTime(year, month, 1));
 
             for (int day = 1; day <= DateTime.DaysInMonth(year, month); day++)
@@ -127,9 +127,9 @@ namespace WikipediaDeathsPages.Service
             return anomaliesPerMonth;
         }
 
-        private ArticleAnomalieDto ResolveArticleAnomalies(ExistingEntryDto entry)
+        private ArticleAnomalieResultDto ResolveArticleAnomalies(ExistingEntryDto entry)
         {
-            ArticleAnomalieDto anomalies = null;
+            ArticleAnomalieResultDto anomalies = null;
 
             string wikiText = wikipediaWebClient.GetWikiTextArticle(entry.ArticleLinkedName, out string redirectedArticle);
 
@@ -164,14 +164,14 @@ namespace WikipediaDeathsPages.Service
             return "[[Category:" + yearOfDeath + " " + termSuffix;
         }
 
-        private void AddAnomalieText(ref ArticleAnomalieDto anomalies, ExistingEntryDto entry, string text )
+        private void AddAnomalieText(ref ArticleAnomalieResultDto anomalies, ExistingEntryDto entry, string text )
         {
             if(anomalies == null)
             {
-                anomalies = new ArticleAnomalieDto
+                anomalies = new ArticleAnomalieResultDto
                 {
+                    Day = entry.DateOfDeath.Day,
                     ArticleLinkedName = entry.ArticleLinkedName,
-                    DateOfDeath = entry.DateOfDeath,
                     Uri = entry.Uri,                    
                 };
             }

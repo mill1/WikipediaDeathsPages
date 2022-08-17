@@ -28,8 +28,7 @@ export class NavMenuComponent implements OnInit {
   fetchAssemblyVersion(){    
     this.http.get<AssemblyProperty>(this.baseUrl + 'assembly/property/Version').subscribe(result => {   
       this.version = result.value;         
-    }, error => {
-      console.log('fetchAssemblyVersion: error');
+    }, error => {      
       console.error(error);}
       );
   }

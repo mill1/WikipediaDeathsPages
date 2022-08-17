@@ -1,0 +1,24 @@
+<button type="button" class="btn btn-primary buttonwidth300px" (click)="onFetch()" [disabled]="isBusy">Perform article checks for {{checkedMonth}}</button>
+
+<div *ngIf="!allArticlesOk(); else elseBlock">
+    <table class="table table-sm"> <!-- bootstrap class table-striped niet gebruiken: overwrites [ngClass] -->
+        <thead class="thead-dark">
+        <tr>      
+          <td colspan="3" style="background-color:white;"><i>{{checkStatus}}</i> <img src="{{getImageSource()}}" style="max-height: 30px"></td>   
+        </tr> 
+        <tr>
+          <th style="width: 5%;">Day</th>
+          <th style="width: 25%;">Article name</th>
+          <th style="width: 70%;">Anomalie(s)</th>
+        </tr>  
+      </thead>
+      <tbody>  
+        <tr *ngFor="let anomalie of anomalies">
+          <td>{{ anomalie.day }}</td>
+          <td><a href="{{ anomalie.uri }}" target="_blank">{{ anomalie.articleLinkedName }}</a></td>
+          <td>{{ anomalie.text }}</td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+<ng-template #elseBlock><div></div></ng-template>

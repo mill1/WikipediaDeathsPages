@@ -50,6 +50,32 @@ namespace WikipediaDeathsPages.Controllers
             }
         }
 
+        [HttpGet("articleanomalies/{year}/{monthId}")]
+        public IEnumerable<ArticleAnomalieResultDto> GetArticleAnomalies(int year, int monthId)
+        {
+            // https://localhost:44304/wikipedia/articleanomalies/1999/4
+
+            try
+            {
+                return wikipediaService.ResolveArticleAnomalies(year, monthId);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e.Message, e);
+                var exceptionName = e.GetType().Name;
+
+                return new List<ArticleAnomalieResultDto>
+                {
+                    new ArticleAnomalieResultDto
+                    {
+                        ArticleLinkedName = $"Error: {exceptionName}",
+                        Uri = $"https://www.google.com/search?q=site%3Astackoverflow.com+{exceptionName}",
+                        Text = e.Message
+                    }
+                };
+            }
+        }
+
         [HttpGet("score/{article}")]
         public ArticleMetrics GetNotabilityScore(string article)
         {

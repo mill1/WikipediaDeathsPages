@@ -16,7 +16,7 @@ export class DeathDayComponent {
   entries: DeathEntryDto[];
   rejectedEntries: ExistingEntryDto[];
   i:number;
-  bsValue = new Date("1993-4-3");
+  bsValue = new Date("1992-3-3");
   MINIMUMSCORE = 48;
   minimumscore = this.MINIMUMSCORE;
   isBusy = false;
@@ -45,6 +45,10 @@ export class DeathDayComponent {
     return -1;
   }
   return this.scoreNumberFour;
+ }
+
+ public getCheckedMonth(){
+  return this.bsValue.getFullYear() + '/' + (this.bsValue.getMonth()+1);
  }
 
  public applyWarningStyle(index:number):boolean{

@@ -20,9 +20,12 @@
     [(ngModel)]="minimumscore" 
     type="number" 
     id="minimumscore" 
-    size="1">
+    style="width: 4em"
+    >
     <span class="space6px"></span>
     <button type="button" class="btn btn-primary" (click)="onFetch()" [disabled]="isBusy">fetch</button>
+    <span class="space9px"></span><span class="space9px"></span>
+    <a href="{{getDayUrl()}}" target="_blank">list article entries</a>
   </div>
 </div>
 
@@ -133,4 +136,5 @@
 
 <app-wikidata-details [deathEntries]="entries" [deathEntriesSorted]="entries"></app-wikidata-details>
 <hr>
-<app-websites-check></app-websites-check>
+<app-websites-check></app-websites-check><br/>
+<app-articles-check [checkedMonth]="getCheckedMonth()"></app-articles-check>

@@ -349,13 +349,13 @@ namespace WikipediaDeathsPages.Service
         //Determine which description to use and sanitize it
         private string DetermineDescription(WikipediaListItemDto entry)
         {
-            if (entry.WikidataItem.Description == null && entry.WikipediaArticle.Description == null)
+            if (string.IsNullOrEmpty(entry.WikidataItem.Description) && string.IsNullOrEmpty(entry.WikipediaArticle.Description))
                 return "Could not resolve description!";
 
-            if (entry.WikidataItem.Description != null && entry.WikipediaArticle.Description == null)
+            if (!string.IsNullOrEmpty(entry.WikidataItem.Description) && string.IsNullOrEmpty(entry.WikipediaArticle.Description))
                 return wikiTextService.SanitizeDescription(entry.WikidataItem.Description);
 
-            if (entry.WikidataItem.Description == null && entry.WikipediaArticle.Description != null)
+            if (string.IsNullOrEmpty(entry.WikidataItem.Description) && !string.IsNullOrEmpty(entry.WikipediaArticle.Description))
                 return wikiTextService.SanitizeDescription(entry.WikipediaArticle.Description);
 
             entry.WikipediaArticle.Description = wikiTextService.SanitizeDescription(entry.WikipediaArticle.Description);

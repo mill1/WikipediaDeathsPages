@@ -151,6 +151,8 @@ namespace WikipediaDeathsPages.Service.Helpers
                     return new List<string> { "Gertie", "Gerty", "Trudy", "Trudie" };
                 case "Gilbert":
                     return new List<string> { "Gil" };
+                case "Gordon":
+                    return new List<string> { "Gordy" };
                 case "Helen":
                 case "Helena":
                     return new List<string> { "Nell", "Nellie", "Lena" };

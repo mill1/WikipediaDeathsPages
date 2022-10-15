@@ -3,8 +3,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using Wikimedia.Utilities.ExtensionMethods;
@@ -42,8 +44,12 @@ namespace WikipediaDeathsPages.Service
             cultureInfo = new CultureInfo("en-US");
 
             webClient = new WebClient();
+            //webClient.Headers.Add(HttpRequestHeader.UserAgent, "/");
             webClient.Headers.Clear();
-            webClient.Headers.Add("User-Agent", "C# application");
+            //webClient.Headers.Add("Host", "hockey-reference.com");
+            webClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0");
+            //webClient.Headers.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+            //webClient.Headers.Add("Accept-Language", "en-GB,en;q=0.5");
         }
 
         public string Resolve(DateTime deathDate, string dateOfDeathreferences, string articleLabel, string knownFor)
@@ -144,10 +150,8 @@ namespace WikipediaDeathsPages.Service
                     return GetBaseballReference(articleLabel, deathDate);
                 case "American football":
                     return GetProFootballReference(articleLabel, deathDate);
-                case "Basketball":
-                    return GetBasketballReference(articleLabel, deathDate);
-                case "Hockey":
-                    return GetHockeyReference(articleLabel, deathDate);
+                case "Basketball": //return GetBasketballReference(articleLabel, deathDate); // try again later
+                case "Hockey":     //return GetHockeyReference(articleLabel, deathDate);
                 case "Olympics":
                     return GetOlympediaReference(articleLabel, deathDate);
                 case "Association football":
@@ -293,7 +297,10 @@ namespace WikipediaDeathsPages.Service
             // https://www.hockey-reference.com/search/search.fcgi?search=Brian+Smith           Died: August 2, 1995
             var searchUrl = "https://www." + sportsSiteName + "/search/search.fcgi?search=" + articleLabel.Replace(" ", "+");
 
-            string response = DownloadString(searchUrl, true);
+            string response = DownloadString(searchUrl, false); // true -> false TODO 403 response (why? always?): https://www.hockey-reference.com/search/search.fcgi?search=Vic+Sluce
+
+            if (response == null)
+                return null;
 
             if (response.Contains("Found <strong>0 hits</strong> that match your search"))
                 return null;
@@ -687,6 +694,7 @@ namespace WikipediaDeathsPages.Service
         {
             try
             {
+                // ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 var response = webClient.DownloadString(url);
                 return response;
             }
@@ -698,6 +706,17 @@ namespace WikipediaDeathsPages.Service
                     return null;
                 else
                 {
+                    /* 
+                     403 response: https://www.hockey-reference.com/search/search.fcgi?search=Bob+Goldham
+                     server=cloudflare reason: https://stackoverflow.com/questions/73367220/pythons-requests-triggers-cloudflares-security-while-accessing-etherscan-io
+
+                    if (e.Response != null)
+                    {
+                        var dataStream = e.Response.GetResponseStream();
+                        var details = new StreamReader(dataStream).ReadToEnd();
+                    }
+                    */
+
                     if (throwException)
                         throw;
 

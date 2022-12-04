@@ -223,11 +223,11 @@ namespace WikipediaDeathsPages.Tests
             "Basketball-Reference.com (single occurrence of name)",
             "Reggie Lewis",
             "1993-7-27",
-            "title=Reggie Lewis Stats - Basketball-Reference.com |url=https://www.basketball-reference.com/players/l/lewisre01.html |website=basketball-reference.com"    // At times the redirect works. At times not.
+            "title=Reggie Lewis Stats - Basketball-Reference.com |url=https://www.basketball-reference.com/search/search.fcgi?search=Reggie+Lewis |website=basketball-reference.com"    // At times the redirect works. At times not.
         )]
         [InlineData(
             "Basketball",
-            "Basketball-Reference.com (multiple occurrences)",
+            "Basketball-Reference.com (multiple occurrences)", // list: https://www.basketball-reference.com/search/search.fcgi?search=Eddie+Johnson
             "Eddie Johnson",
             "2020-10-26",
             "title=Eddie Johnson Stats - Basketball-Reference.com |url=https://www.basketball-reference.com/players/j/johnsed02.html |website=basketball-reference.com"

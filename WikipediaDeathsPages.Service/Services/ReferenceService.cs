@@ -150,8 +150,10 @@ namespace WikipediaDeathsPages.Service
                     return GetBaseballReference(articleLabel, deathDate);
                 case "American football":
                     return GetProFootballReference(articleLabel, deathDate);
-                case "Basketball": //return GetBasketballReference(articleLabel, deathDate); // try again later
-                case "Hockey":     //return GetHockeyReference(articleLabel, deathDate);
+                case "Basketball": 
+                    return GetBasketballReference(articleLabel, deathDate); 
+                case "Hockey":     
+                    return GetHockeyReference(articleLabel, deathDate);
                 case "Olympics":
                     return GetOlympediaReference(articleLabel, deathDate);
                 case "Association football":

@@ -19,6 +19,23 @@ namespace WikipediaDeathsPages.Tests
             referenceService = new ReferenceService(wikipediaReferencesMock.Object, null, null);
         }
 
+        // reference URL: http://www.theguardian.com/news/2001/apr/18/guardianobituaries.books
+        [Fact(DisplayName = "Resolve The Guardian reference")]
+        public void ResolveTheGuardianReference()
+        {
+            const string name = "Beryl Gilroy";
+            const string url = "https://www.theguardian.com/news/2001/apr/18/guardianobituaries.books";
+            var deathDate = new DateTime(2001, 4, 4);
+            var dateOfDeathRef = $"enwiki~!reference URL: {url}";
+
+            var expectedSubstring1 = $"author1=Peter D Fraser |author-link1= |title={name} |url={url}";
+            var expectedSubstring2 = $"work=[[The Guardian]] |language= |date=18 April 2001";
+            var actualString = referenceService.Resolve(deathDate, dateOfDeathRef, name, null);
+
+            Assert.Contains(expectedSubstring1, actualString);
+            Assert.Contains(expectedSubstring2, actualString);
+        }
+
         // The Independent is the only non-sports website whose response is checked for the expected date death.
         [Fact(DisplayName = "Resolve The Independent reference (1)")]
         public void ResolveTheIndependentReferencePeople()
@@ -28,7 +45,7 @@ namespace WikipediaDeathsPages.Tests
             var deathDate = new DateTime(1993, 7, 28);
             var dateOfDeathRef = $"enwiki~!reference URL: {url}";
 
-            var expectedSubstring1 = $"author1=Jim Reynolds |author-link1= |title=Obituary: Stanley Woods |url={url}";
+            var expectedSubstring1 = $"author1=Jim Reynolds |author-link1= |title=Obituary: {name} |url={url}";
             var expectedSubstring2 = $"work=[[The Independent]] |language= |date=30 July 1993";
             var actualString = referenceService.Resolve(deathDate, dateOfDeathRef, name, null);
 

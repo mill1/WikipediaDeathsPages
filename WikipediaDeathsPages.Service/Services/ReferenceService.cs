@@ -207,7 +207,7 @@ namespace WikipediaDeathsPages.Service
                         if (response == null)
                             return null;
 
-                        if (response.Contains(GetLongEnDateText(deathDate)))
+                        if (response.Contains(GetFormattedDateEnUS(deathDate, "d MMMM yyyy")))
                             return GenerateWebReference($"Olympedia – {articleLabel}", url, "olympedia.org", DateTime.Today, DateTime.MinValue, publisher: "[[OlyMADMen]]");
                     }
                 }
@@ -368,6 +368,42 @@ namespace WikipediaDeathsPages.Service
             if (BritannicaUrlFound(referenceItems, ref url))
                 return GenerateWebReference(articleLabel, url, "britannica.com", DateTime.Today, DateTime.MinValue, publisher: "Encyclopædia Britannica Online");
 
+            if (GuardianUrlFound(referenceItems, ref url))
+            {
+                var response = DownloadString(url, true);
+
+                if (response == null)
+                    return null;
+
+                
+                var deathDateSearch = GetFormattedDateEnUS(deathDate, "MMMM d yyyy"); // April 4 2001
+
+                if (!response.Contains(deathDateSearch))
+                    return $"Death date '{deathDateSearch}' not found HTML The Guardian";
+
+                var data = RetrieveGuardianData(response);
+
+                DateTime pubdate;                
+                string dateString = data.config.page.contentId.Substring("news/".Length);
+                int pos = dateString.LastIndexOf("/");
+
+                if (pos == -1)
+                {
+                    pubdate = DateTime.MinValue;
+                }
+                else
+                {
+                    dateString = dateString.Substring(0, pos);
+
+                    if (!DateTime.TryParse(dateString, out pubdate))
+                    {
+                        pubdate = DateTime.MinValue;
+                    }
+                }
+
+                return GenerateNewsReference(data.config.page.headline , url, "", DateTime.Today, "[[The Guardian]]", pubdate, data.config.page.byline);
+            }                
+
             if (IndependentUrlFound(referenceItems, ref url))
             {
                 var response = DownloadString(url, true);
@@ -375,7 +411,7 @@ namespace WikipediaDeathsPages.Service
                 if (response == null)
                     return null;
 
-                var deathDateSearch = GetLongEnDateText(deathDate);
+                var deathDateSearch = GetFormattedDateEnUS(deathDate, "d MMMM yyyy");
 
                 if (!response.Contains(deathDateSearch))
                     return $"Death date '{deathDateSearch}' not found HTML The Independent";
@@ -409,6 +445,30 @@ namespace WikipediaDeathsPages.Service
                 return GenerateWebReference($"matchID - {articleLabel}", url, "[[Fichier des personnes décédées|Fichier des décès]]", DateTime.Today, DateTime.MinValue, language: "fr");
 
             return null;
+        }
+
+        private GuardianConfigData RetrieveGuardianData(string response)
+        {
+            const string PhraseStart = "window.guardian = ";
+
+            HtmlDocument htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(response);
+
+            var guardianConfigNode = htmlDoc.DocumentNode.Descendants("script")
+            .Where(node => node.InnerText.Contains("window.guardian = {\"config\"")).FirstOrDefault();
+
+            if (guardianConfigNode == null)
+                return null;
+
+            var jsonString = guardianConfigNode.InnerText;
+            int pos = jsonString.IndexOf(PhraseStart);
+            jsonString = jsonString.Substring(pos + PhraseStart.Length);
+            pos = jsonString.LastIndexOf("}}") + "}}".Length;
+            jsonString = jsonString.Substring(0, pos);
+
+            var data = JsonConvert.DeserializeObject<GuardianConfigData>(jsonString);
+
+            return data;
         }
 
         private IndependentDigitalData RetrieveIndependentData(string response)
@@ -445,7 +505,7 @@ namespace WikipediaDeathsPages.Service
                 return GenerateWebReference($"{articleLabel} - Social Networks and Archival Context", url, "snaccooperative.org", DateTime.Today, DateTime.MinValue);
 
             if (BnFUrlFound(referenceItems, ref url, ref website))
-                return GenerateWebReference(articleLabel, url, website, DateTime.Today, DateTime.MinValue, publisher: "Bibliothèque nationale de France", language: "French");
+                return GenerateWebReference(articleLabel, url, website, DateTime.Today, DateTime.MinValue, publisher: "Bibliothèque nationale de France", language: "fr");
 
             return null;
         }
@@ -462,6 +522,16 @@ namespace WikipediaDeathsPages.Service
 
             // https://www.britannica.com/biography/Donald-Alfred-Davie
             return ReferenceUrlFound("https://www.britannica.com", referenceItems, true, ref referenceUrl); // https://
+        }
+
+        private bool GuardianUrlFound(List<string> referenceItems, ref string referenceUrl)
+        {
+            // http://www.theguardian.com/news/2001/apr/18/guardianobituaries.books
+            if (ReferenceUrlFound("http://www.theguardian.com/news", referenceItems, true, ref referenceUrl))    // oud in Wikidata
+                return true;
+
+            // https://www.theguardian.com/news/2001/apr/18/guardianobituaries.books
+            return ReferenceUrlFound("https://www.theguardian.com/news/", referenceItems, true, ref referenceUrl); // https://
         }
 
         private bool IndependentUrlFound(List<string> referenceItems, ref string referenceUrl)
@@ -614,10 +684,10 @@ namespace WikipediaDeathsPages.Service
             return match.Value.ValueBetweenTwoStrings("\"", "\"");
         }
 
-        private string GetLongEnDateText(DateTime date)
+        private string GetFormattedDateEnUS(DateTime date, string format)
         {
             var ci = new CultureInfo("en-US");
-            return date.ToString("d MMMM yyyy", ci);
+            return date.ToString(format, ci);
         }
 
         private string GetWhere2GolfMonthName(DateTime date)

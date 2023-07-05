@@ -379,9 +379,12 @@ namespace WikipediaDeathsPages.Service
                 var deathDateSearch = GetFormattedDateEnUS(deathDate, "MMMM d yyyy"); // April 4 2001
 
                 if (!response.Contains(deathDateSearch))
-                    return $"Death date '{deathDateSearch}' not found HTML The Guardian";
+                    return $" '''### Death date '{deathDateSearch}' not found HTML The Guardian ###''' ";
 
                 var data = RetrieveGuardianData(response);
+
+                if (data == null)
+                    return " '''### JSON cannot be scraped from HTML The Guardian ###''' ";
 
                 DateTime pubdate;                
                 string dateString = data.config.page.contentId.Substring("news/".Length);
@@ -414,12 +417,12 @@ namespace WikipediaDeathsPages.Service
                 var deathDateSearch = GetFormattedDateEnUS(deathDate, "d MMMM yyyy");
 
                 if (!response.Contains(deathDateSearch))
-                    return $"Death date '{deathDateSearch}' not found HTML The Independent";
+                    return $" '''### Death date '{deathDateSearch}' not found HTML The Independent ###''' ";
 
                 var data = RetrieveIndependentData(response);
 
                 if (data == null)
-                    return "JSON cannot be scraped from HTML The Independent";
+                    return " '''### JSON cannot be scraped from HTML The Independent ###''' ";
 
                 var pubdate = DateTime.Parse(data.published_date);
 

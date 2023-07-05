@@ -58,6 +58,10 @@ namespace WikipediaDeathsPages.Service
 
                 throw new NullReferenceException($"{article}: Exception retrieving site links. No corresponding Wikidata item?");
             }
+            catch(Exception e)
+            {
+                throw new Exception($"WikipediaService.GetSiteLinksCount('{article}'): error calling WikidataService.GetSitelinksResult('{article}'). Message: {e.Message}", e);
+            }
         }
 
         public IEnumerable<ArticleMetrics> GetArticleMetrics(IEnumerable<string> articles)
@@ -574,16 +578,23 @@ namespace WikipediaDeathsPages.Service
 
         private WikipediaArticleDto InitializeWikipediaArticle(string articleName)
         {
-            int linksToArticleCount = 0;
-
-            if (articleName != null)
-                linksToArticleCount = toolforgeService.GetWikilinksInfo(articleName).direct;
-
-            return new WikipediaArticleDto
+            try
             {
-                Name = articleName,
-                LinksToArticleCount = linksToArticleCount
-            };
+                int linksToArticleCount = 0;
+
+                if (articleName != null)
+                    linksToArticleCount = toolforgeService.GetWikilinksInfo(articleName).direct;
+
+                return new WikipediaArticleDto
+                {
+                    Name = articleName,
+                    LinksToArticleCount = linksToArticleCount
+                };
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"WikipediaService.InitializeWikipediaArticle('{articleName}'): error calling toolforgeService.GetWikilinksInfo('{articleName}'). Message: {e.Message}", e);
+            }
         }
 
         private int ResolveScoreNumberFour(List<WikipediaListItemDto> entries)

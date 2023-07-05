@@ -15,9 +15,8 @@ export class DeathDayComponent {
   scoreNumberFour: number;
   entries: DeathEntryDto[];
   rejectedEntries: ExistingEntryDto[];
-  i: number;
-  bsValue = new Date("2001-4-4");
-  // bsValue = new Date("2002-2-2");
+  i: number;  
+  bsValue = new Date("2002-2-2");
   MINIMUMSCORE = 48;
   minimumscore = this.MINIMUMSCORE;
   isBusy = false;

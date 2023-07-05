@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WikipediaDeathsPages.Service.Models
+﻿namespace WikipediaDeathsPages.Service.Models
 {
 
     public class GuardianConfigData

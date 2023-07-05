@@ -182,6 +182,8 @@ namespace WikipediaDeathsPages.Tests
         [InlineData("Encyclopædia Britannica (1)", "enwiki~!Encyclopædia Britannica Online~!Encyclopædia Britannica Online ID: biography/NOTFOUND")]
         [InlineData("Encyclopædia Britannica (2)", "enwiki~!reference URL: http://www.britannica.com/biography/NOTFOUND")]
         [InlineData("Encyclopædia Britannica (3)", "enwiki~!reference URL: https://www.britannica.com/biography/NOTFOUND")]
+        [InlineData("The Guardian (1)", "enwiki~!reference URL: http://www.theguardian.com/news/NOTFOUND")]
+        [InlineData("The Guardian (2)", "enwiki~!reference URL: https://www.theguardian.com/news/NOTFOUND")]
         [InlineData("The Independent", "enwiki~!reference URL: https://www.independent.co.uk/news/people/obituary-NOTFOUND.html")]
         [InlineData("Spanish Biographical Dictionary (DB~e)", "Spanish Biographical Dictionary~!subject named as: Not Found~!Spanish Biographical Dictionary ID: NOTFOUND")]
         [InlineData("Biografisch Portaal", "Biografisch Portaal~!Biografisch Portaal van Nederland ID: NOTFOUND~!reference URL: http://www.biografischportaal.nl/persoon/NOTFOUND~!title: Not Found")]

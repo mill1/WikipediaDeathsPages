@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace WikipediaDeathsPages.Service.Dtos
+﻿namespace WikipediaDeathsPages.Service.Dtos
 {
     public class ArticleAnomalieResultDto
     {

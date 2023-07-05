@@ -58,6 +58,10 @@ namespace WikipediaDeathsPages.Service
 
                 throw new NullReferenceException($"{article}: Exception retrieving site links. No corresponding Wikidata item?");
             }
+            catch(Exception e)
+            {
+                throw new Exception($"WikipediaService.GetSiteLinksCount('{article}'): error calling WikidataService.GetSitelinksResult('{article}'). Message: {e.Message}", e);
+            }
         }
 
         public IEnumerable<ArticleMetrics> GetArticleMetrics(IEnumerable<string> articles)

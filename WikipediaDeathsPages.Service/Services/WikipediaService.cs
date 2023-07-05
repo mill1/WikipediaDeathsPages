@@ -578,16 +578,23 @@ namespace WikipediaDeathsPages.Service
 
         private WikipediaArticleDto InitializeWikipediaArticle(string articleName)
         {
-            int linksToArticleCount = 0;
-
-            if (articleName != null)
-                linksToArticleCount = toolforgeService.GetWikilinksInfo(articleName).direct;
-
-            return new WikipediaArticleDto
+            try
             {
-                Name = articleName,
-                LinksToArticleCount = linksToArticleCount
-            };
+                int linksToArticleCount = 0;
+
+                if (articleName != null)
+                    linksToArticleCount = toolforgeService.GetWikilinksInfo(articleName).direct;
+
+                return new WikipediaArticleDto
+                {
+                    Name = articleName,
+                    LinksToArticleCount = linksToArticleCount
+                };
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"WikipediaService.InitializeWikipediaArticle('{articleName}'): error calling toolforgeService.GetWikilinksInfo('{articleName}'). Message: {e.Message}", e);
+            }
         }
 
         private int ResolveScoreNumberFour(List<WikipediaListItemDto> entries)

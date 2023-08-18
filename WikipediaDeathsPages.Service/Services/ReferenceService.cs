@@ -477,8 +477,6 @@ namespace WikipediaDeathsPages.Service
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(response);
 
-            var x = htmlDoc.DocumentNode.Descendants("script");
-
             var digitalDataNode = htmlDoc.DocumentNode.Descendants("script")
             .Where(node => node.InnerText.StartsWith("digitalData")).FirstOrDefault();
 

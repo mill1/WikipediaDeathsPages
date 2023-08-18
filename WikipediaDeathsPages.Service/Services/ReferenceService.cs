@@ -477,13 +477,18 @@ namespace WikipediaDeathsPages.Service
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(response);
 
-            var digitalDataNode = htmlDoc.DocumentNode.Descendants("amp-state")
-            .Where(node => node.GetAttributeValue("id", "").Equals("digitalData")).FirstOrDefault();
+            var x = htmlDoc.DocumentNode.Descendants("script");
+
+            var digitalDataNode = htmlDoc.DocumentNode.Descendants("script")
+            .Where(node => node.InnerText.StartsWith("digitalData")).FirstOrDefault();
 
             if (digitalDataNode == null)
                 return null;
 
-            var jsonString = digitalDataNode.FirstChild.InnerText;
+            int startIndex = digitalDataNode.InnerText.IndexOf("{");
+            int endIndex = digitalDataNode.InnerText.IndexOf("}", startIndex);
+            var jsonString = digitalDataNode.InnerText.Substring(startIndex, endIndex-startIndex+"}".Length);
+
             var data = JsonConvert.DeserializeObject<IndependentDigitalData>(jsonString);
 
             return data;

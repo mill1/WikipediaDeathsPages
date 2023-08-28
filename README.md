@@ -3,7 +3,7 @@ Webapplication focussed on the content of Wikipedia deaths list articles.
 
 ### Personal website
 The Wikipedia Deaths Pages assists me in my endeavour to improve the quality of the [Deaths per month articles](https://en.wikipedia.org/wiki/Lists_of_deaths_by_year) on Wikipedia.
-Per selected day it generates the wikitext which can be pasted in the day subsection of a specific list article.
+Per selected day it generates the [wikitext](https://en.wikipedia.org/wiki/Help:Wikitext) which can be pasted in the day subsection of a specific list article.
 During that process a lot happens: 
 the source of people who died on a specific date is [this Wikidata query](https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2021/12#Minor_issue_regarding_Humans_per_DoD_query).
 The results are filtered based on a notability value before being displayed on the site. 
@@ -14,7 +14,7 @@ Various other websites are also checked automatically as sources for references 
 [olympedia.org](http://www.olympedia.org/) and [worldfootball.net](https://www.worldfootball.net/)).
 
 This application contains a lot more functionality like the ability to generate entry descriptions from the corresponding Wikipedia page of the decease (see code). 
-It it is safe to say that the site sped up the process of cleaning up the Wikipedia Deaths Pages considerably. 
+It it is safe to say that the site speeds up the huge task of cleaning up the Wikipedia Deaths Pages more than considerably. 
 The process would otherwise be too time-consuming, tedious and error-prone.
 
 ![Screenshot-WDP](https://github.com/mill1/WikipediaDeathsPages/assets/30286933/dc519e03-f401-4140-8aed-1098ded147e4)

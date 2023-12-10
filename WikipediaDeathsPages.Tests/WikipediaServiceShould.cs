@@ -23,7 +23,6 @@ namespace WikipediaDeathsPagesTests
         private readonly Mock<IWikidataService> wikidataServiceMock;
         private readonly Mock<IWikipediaWebClient> webClientMock;
         private readonly Mock<IReferenceService> referenceServiceMock;
-        private readonly Mock<IToolforgeService> toolforgeServiceMock;
 
         public WikipediaServiceShould()
         {
@@ -32,9 +31,8 @@ namespace WikipediaDeathsPagesTests
             webClientMock = new Mock<IWikipediaWebClient>();
             referenceServiceMock = new Mock<IReferenceService>();
             var articleName = CreateWikidataItemDto(description: null).ArticleName;
-            toolforgeServiceMock = new Mock<IToolforgeService>();
-            toolforgeServiceMock.Setup(_ => _.GetWikilinksInfo(articleName)).Returns(new Wikilinks { all = 600, direct = 500, indirect = 100 });
         }
+
 
         [Fact(DisplayName = "Get the deceased belonging to a date of death")]
         public void GetEntriesPerDeathDate()
@@ -62,9 +60,10 @@ namespace WikipediaDeathsPagesTests
 
             webClientMock.Setup(_ => _.GetWikiTextArticle(itemDto.ArticleName, out s)).Returns("infobox{{ | Death_cause   = car crash  | .. | ..}} She was an American singer, actress and model. She was born..");
             webClientMock.Setup(_ => _.GetWikiTextArticle($"Deaths in {month} {deathDate.Year}", out s)).Returns(returnWikiTextMonthArticle);
+            webClientMock.Setup(_ => _.GetWikimediaSearchDirectLinkCount(itemDto.ArticleName)).Returns(666);
 
             var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceServiceMock.Object,
-                                                        new WikiTextService(), toolforgeServiceMock.Object, webClientMock.Object, logger);
+                                                        new WikiTextService(), webClientMock.Object, logger);
 
             var result = wikipediaService.GetDeathDateResult(deathDate, 48);
 
@@ -90,7 +89,7 @@ namespace WikipediaDeathsPagesTests
             webClientMock.Setup(_ => _.GetWikiTextArticle(articleLinkedName, out s)).Returns(articleText);
 
             var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceServiceMock.Object,
-            wikiTextServiceMock.Object, toolforgeServiceMock.Object, webClientMock.Object, logger);
+            wikiTextServiceMock.Object, webClientMock.Object, logger);
 
             var anomalies = wikipediaService.ResolveArticleAnomalies(deathDate.Year, deathDate.Month);
             Assert.Equal("Death date 1 April 1999 not encountered in article", anomalies.First().Text);
@@ -115,7 +114,7 @@ namespace WikipediaDeathsPagesTests
             webClientMock.Setup(_ => _.GetWikiTextArticle(articleLinkedName, out s)).Returns(articleText);
 
             var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceServiceMock.Object,
-            wikiTextServiceMock.Object, toolforgeServiceMock.Object, webClientMock.Object, logger);
+            wikiTextServiceMock.Object, webClientMock.Object, logger);
 
             var anomalies = wikipediaService.ResolveArticleAnomalies(deathDate.Year, deathDate.Month);
             Assert.Equal("Categorie '[[Category:1999 deaths' not encountered in article", anomalies.First().Text);
@@ -139,7 +138,7 @@ namespace WikipediaDeathsPagesTests
             webClientMock.Setup(_ => _.GetWikiTextArticle(articleLinkedName, out s)).Returns(articleText);
 
             var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceServiceMock.Object,
-            wikiTextServiceMock.Object, toolforgeServiceMock.Object, webClientMock.Object, logger);
+            wikiTextServiceMock.Object, webClientMock.Object, logger);
 
             var anomalies = wikipediaService.ResolveArticleAnomalies(deathDate.Year, deathDate.Month);
             Assert.Equal("Death date 1 April 1999 not encountered in article, Categorie '[[Category:1999 deaths' not encountered in article", anomalies.First().Text);
@@ -154,12 +153,13 @@ namespace WikipediaDeathsPagesTests
             wikidataServiceMock.Setup(_ => _.GetItemsPerDeathDate(DateTime.MinValue, false)).Returns(new List<WikidataItemDto> { itemDto });
             wikidataServiceMock.Setup(_ => _.ResolveItemLabel(itemDto)).Returns(itemDto.ArticleName);
             webClientMock.Setup(_ => _.GetWikiTextArticle(itemDto.ArticleName, out s)).Returns($"{itemDto.ArticleName} was a Dutch athlete who was an Olympic champion.");
+            webClientMock.Setup(_ => _.GetWikimediaSearchDirectLinkCount(itemDto.ArticleName)).Returns(666);
 
             var wikipediaReferencesMock = new Mock<IWikipediaReferences>();
             wikipediaReferencesMock.Setup(_ => _.GetIdsOfName(itemDto.ArticleName)).Throws<InvalidOperationException>();
 
             var referenceService = new ReferenceService(wikipediaReferencesMock.Object, null, null);
-            var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceService, new WikiTextService(), toolforgeServiceMock.Object, webClientMock.Object, logger);
+            var wikipediaService = new WikipediaService(wikidataServiceMock.Object, referenceService, new WikiTextService(), webClientMock.Object, logger);
 
             var expectedSubstring = $"error: {itemDto.ArticleName} [WikipediaService.ResolveEntryText]: Operation is not valid due to the current state of the object.";
             var result = wikipediaService.GetDeathDateResult(DateTime.MinValue, 48);

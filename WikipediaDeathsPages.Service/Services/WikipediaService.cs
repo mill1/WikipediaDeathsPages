@@ -18,31 +18,29 @@ namespace WikipediaDeathsPages.Service
         private readonly IWikidataService wikidataService;
         private readonly IReferenceService referenceService;
         private readonly IWikiTextService wikiTextService;
-        private readonly IToolforgeService toolforgeService;
         private readonly IWikipediaWebClient wikipediaWebClient;
         private readonly ILogger<WikipediaService> logger;
         private int minimumScore;
 
         public WikipediaService(IWikidataService wikidataService, IReferenceService referenceService, IWikiTextService wikiTextService,
-                                IToolforgeService toolforgeService, IWikipediaWebClient wikipediaWebClient, ILogger<WikipediaService> logger)
+                                IWikipediaWebClient wikipediaWebClient, ILogger<WikipediaService> logger)
         {
             this.wikidataService = wikidataService;
             this.referenceService = referenceService;
             this.wikiTextService = wikiTextService;
-            this.toolforgeService = toolforgeService;
             this.wikipediaWebClient = wikipediaWebClient;
             this.logger = logger;
         }
 
         public ArticleMetrics GetArticleMetrics(string article)
         {
-            var linksInfo = toolforgeService.GetWikilinksInfo(article);
+            var linksToArticleCount = wikipediaWebClient.GetWikimediaSearchDirectLinkCount(article);
             int siteLinks = GetSiteLinksCount(article);
 
             return new ArticleMetrics
             {
                 ArticleName = article,
-                LinksToArticleCount = linksInfo.direct,
+                LinksToArticleCount = linksToArticleCount,
                 SiteLinksCount = siteLinks
             };
         }
@@ -583,7 +581,7 @@ namespace WikipediaDeathsPages.Service
                 int linksToArticleCount = 0;
 
                 if (articleName != null)
-                    linksToArticleCount = toolforgeService.GetWikilinksInfo(articleName).direct;
+                    linksToArticleCount = wikipediaWebClient.GetWikimediaSearchDirectLinkCount(articleName);
 
                 return new WikipediaArticleDto
                 {

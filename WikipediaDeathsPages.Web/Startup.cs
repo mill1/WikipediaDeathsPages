@@ -51,7 +51,6 @@ namespace WikipediaDeathsPages
             services.AddScoped<IWikidataService, WikidataService>();
             services.AddScoped<IWikiTextService, WikiTextService>();
             services.AddScoped<IReferenceService, ReferenceService>();
-            services.AddScoped<IToolforgeService, ToolforgeService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
